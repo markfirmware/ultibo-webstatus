@@ -114,8 +114,9 @@ begin
  LoggingOutput(Format('BoardType %s',[BoardTypeToString(BoardGetType)]));
  LoggingOutput(Format('Ultibo Release %s %s %s',[ULTIBO_RELEASE_DATE,ULTIBO_RELEASE_NAME,ULTIBO_RELEASE_VERSION]));
  ClrScr;
- while True do
-  Sleep(1);
+ if InService then
+  while True do
+   Sleep(1);
 end;
 
 begin
