@@ -1361,7 +1361,7 @@ begin
   AddContent(AResponse,'   <title>' + ATitle + '</title>');
   AddContent(AResponse,' </head>');
   AddContent(AResponse,' <body>');
-  AddContent(AResponse,'   <table style=" text-align: left; width: 75%; height: 100%; margin-left: auto; margin-right: auto; font-family: Arial;" border="0" cellpadding="2" cellspacing="2">');
+  AddContent(AResponse,'   <table style=" text-align: left; width: 75%; height: 100%; margin-left: auto; margin-right: auto; font-family: monospace;" border="0" cellpadding="2" cellspacing="2">');
   AddContent(AResponse,'     <tbody>');
   AddContent(AResponse,'       <tr>');
   AddContent(AResponse,'         <td colspan="' + IntToStr(AColumns + 1) + '" rowspan="1" style=" text-align: center; vertical-align: middle; background-color: rgb(255, 153, 0); height: 65px;"><strong>' + ATitle + '</strong><br>');
