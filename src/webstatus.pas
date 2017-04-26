@@ -51,7 +51,7 @@ uses GlobalConfig,GlobalConst,GlobalTypes,Platform,{$IFDEF CPUARM}PlatformARM,{$
      
 {==============================================================================}
 {Global definitions}
-{$INCLUDE ..\core\GlobalDefines.inc}
+{$INCLUDE GlobalDefines.inc}
 
 {==============================================================================}
 const
