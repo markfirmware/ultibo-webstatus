@@ -5,15 +5,14 @@ from circleclient import circleclient
 
 username = 'markfirmware'
 project = 'ultibo-webstatus'
-branch='test-20170425'
+branch = 'test-20170425'
+ports = ['5080:80']
 
 def getbuild (username, project, branch):
-    global artifacts, circle, kernelpath, lastbuildnum
+    global artifacts, circle, kernelpath
     builds = circle.build.recent (username, project, branch=branch)
     build = builds [0]
     build_num = build ['build_num']
-    if build_num == lastbuildnum:
-        return False
     print username, project, 'build', build_num, build ['status']
     if not (build ['status'] in ['fixed', 'success']):
         return False
@@ -37,25 +36,35 @@ def getbuild (username, project, branch):
         with open (p, 'wb') as fd:
             for chunk in r.iter_content (chunk_size=4096):
                 fd.write (chunk)
-    lastbuildnum = build_num
     return True
 
+def runqemu (kernelpath):
+    qemu = subprocess.Popen (["qemu-system-arm",
+                              "-M", "versatilepb",
+                              "-cpu", "cortex-a8",
+                              "-kernel", kernelpath,
+                              "-m", "256M",
+                              "-serial", "stdio",
+                              "-usb",
+                              "-net", "nic",
+                              "-net", "user,hostfwd=tcp::5080-:80",
+                              "-display", "none"],
+                             stdin=subprocess.PIPE,
+                             stdout=subprocess.PIPE,
+                             stderr=subprocess.PIPE)
+    while True:
+        line = qemu.stdout.readline ()
+        print line,
+        if 'program stop' in line:
+            break
+
 def main ():
-    global circle, kernelpath, lastbuildnum
+    global circle, kernelpath
     circle = circleclient.CircleClient ('')
-    lastbuildnum = 0
-    while not getbuild (username, project, branch):
-        time.sleep (30)
-    qemuprocess = subprocess.call (["qemu-system-arm",
-                                    "-M", "versatilepb",
-                                    "-cpu", "cortex-a8",
-                                    "-kernel", kernelpath,
-                                    "-m", "256M",
-                                    "-usb",
-                                    "-net", "nic",
-                                    "-net", "user,hostfwd=tcp::5080-:80",
-                                    "-display", "none"])
-    print "qemu started"
+    while True:
+        while not getbuild (username, project, branch):
+            time.sleep (30)
+        runqemu (kernelpath)
 
 if __name__ == "__main__":
     main ()

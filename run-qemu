@@ -135,24 +135,6 @@ for i in range (4):
     serial [i] = TcpChannel ('serial{}'.format (i),  38000 + i)
 print "channels"
 
-def runold ():
-    drainall ()
-    #screendump ()
-    for s in serial:
-        for i in range (1, 10):
-            serial [s].writekeyboardline ('line {}'.format (i))
-    sleep (12)
-    #screendump ()
-
-    drainall ()
-    monitor.writeline ('quit')
-    sleep (1)
-    drainall ()
-    monitor.finishquit (qemuprocess)
-
-    #print
-    #print 'qemu return code', qemuprocess.returncode
-
 def run ():
     global stopping
     stopping = False
@@ -170,4 +152,5 @@ run ()
 
 monitor.close ()
 for i in serial:
+    serial [i].logfile.write ('\n')
     serial [i].close ()
