@@ -43,7 +43,7 @@ function test-qemu-controller {
     pwd
     time python $RESTORE_PWD/run-qemu
     if [[ $? -ne 0 ]]; then log fail: $?; fi
-    cd $ARTIFACTS/QEMUVPB/test
+    cd test
 
     for textfile in *.txt
     do
