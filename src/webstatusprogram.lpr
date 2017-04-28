@@ -12,6 +12,20 @@ uses
  StrUtils,SysUtils,Ultibo,WebStatus,Winsock2;
 
 type
+ TWebAboutStatus = class (TWebStatusCustom)
+  function DoContent(AHost:THTTPHost;ARequest:THTTPServerRequest;AResponse:THTTPServerResponse):Boolean; override;
+ end;
+
+function TWebAboutStatus.DoContent(AHost:THTTPHost;ARequest:THTTPServerRequest;AResponse:THTTPServerResponse):Boolean; 
+begin
+ AddItem(AResponse,'About:','... source etc ...');
+ Result:=True;
+end;
+
+var
+ AboutStatus:TWebAboutStatus;
+
+type
  TTarget = (Rpi, Rpi2, Rpi3, QemuVpb);
 
 function TargetToString(Target:TTarget):String;
@@ -97,6 +111,8 @@ procedure StartHttpServer;
 begin
  HTTPListener:=THTTPListener.Create;
  WebStatusRegister(HTTPListener,'','',True);
+ AboutStatus:=TWebAboutStatus.Create('name','path',2);
+ Log(AboutStatus.Name);
  HTTPListener.Active:=True;
 end;
 

@@ -92,11 +92,11 @@ function build-as {
                 QEMUVPB)
                     build-lpr $SRC_FOLDER $LPR_FILE $CONTROLLER CONTROLLER_QEMUVPB "-CpARMV7A -WpQEMUVPB" qemuvpb.cfg
                     test-qemu-controller ;;
-                RPi)
+                RPI)
                     build-lpr $SRC_FOLDER $LPR_FILE $CONTROLLER CONTROLLER_RPI_INCLUDING_RPI0 "-CpARMV6 -WpRPIB" rpi.cfg ;;
-                RPi2)
+                RPI2)
                     build-lpr $SRC_FOLDER $LPR_FILE $CONTROLLER CONTROLLER_RPI2_INCLUDING_RPI3 "-CpARMV7A -WpRPI2B" rpi2.cfg ;;
-                RPi3)
+                RPI3)
                     build-lpr $SRC_FOLDER $LPR_FILE $CONTROLLER CONTROLLER_RPI3 "-CpARMV7A -WpRPI3B" rpi3.cfg ;;
             esac
         fi
@@ -159,5 +159,3 @@ mkdir -p $ARTIFACTS $OBJ
 build-ultibo-webstatus
 
 create-build-summary
-
-
