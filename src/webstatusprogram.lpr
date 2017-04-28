@@ -112,7 +112,7 @@ procedure StartHttpServer;
 begin
  HTTPListener:=THTTPListener.Create;
  WebStatusRegister(HTTPListener,'','',True);
- AboutStatus:=TWebAboutStatus.Create('About','about',2);
+ AboutStatus:=TWebAboutStatus.Create('About','/about',2);
  Log(AboutStatus.Name);
  HTTPListener.Active:=True;
 end;
