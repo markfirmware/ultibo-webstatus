@@ -67,9 +67,9 @@
       <LinkSmart Value="True"/>
     </Linking>
     <Other>
-      <CustomOptions Value="-dTARGET_QEMUVPB"/>
+      <CustomOptions Value="-dCONTROLLER_QEMUVPB"/>
       <OtherDefines Count="1">
-        <Define0 Value="TARGET_QEMUVPB"/>
+        <Define0 Value="CONTROLLER_QEMUVPB"/>
       </OtherDefines>
     </Other>
   </CompilerOptions>

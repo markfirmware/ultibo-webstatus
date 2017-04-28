@@ -101,7 +101,7 @@ type
 function TWebAboutStatus.DoContent(AHost:THTTPHost;ARequest:THTTPServerRequest;AResponse:THTTPServerResponse):Boolean; 
 begin
  Log('About DoContent');
- AddItem(AResponse,'About:','... source etc ...');
+ AddItem(AResponse,'Source:',MakeLink('repo','http://github.com/markfirmware/ultibo-webstatus'));
  Result:=True;
 end;
 
