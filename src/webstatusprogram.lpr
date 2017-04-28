@@ -57,21 +57,6 @@ begin
   end;
 end;
 
-type
- TWebAboutStatus = class (TWebStatusCustom)
-  function DoContent(AHost:THTTPHost;ARequest:THTTPServerRequest;AResponse:THTTPServerResponse):Boolean; override;
- end;
-
-function TWebAboutStatus.DoContent(AHost:THTTPHost;ARequest:THTTPServerRequest;AResponse:THTTPServerResponse):Boolean; 
-begin
- Log('About DoContent');
- AddItem(AResponse,'About:','... source etc ...');
- Result:=True;
-end;
-
-var
- AboutStatus:TWebAboutStatus;
-
 function InService:Boolean;
 begin
  Result := not ((ParamCount >= 1) and (ParamStr(1)='postbuildtest'));
@@ -108,12 +93,27 @@ begin
  Log(Format('IP address %s',[Result]));
 end;
 
+type
+ TWebAboutStatus = class (TWebStatusCustom)
+  function DoContent(AHost:THTTPHost;ARequest:THTTPServerRequest;AResponse:THTTPServerResponse):Boolean; override;
+ end;
+
+function TWebAboutStatus.DoContent(AHost:THTTPHost;ARequest:THTTPServerRequest;AResponse:THTTPServerResponse):Boolean; 
+begin
+ Log('About DoContent');
+ AddItem(AResponse,'About:','... source etc ...');
+ Result:=True;
+end;
+
+var
+ AboutStatus:TWebAboutStatus;
+
 procedure StartHttpServer;
 begin
  HTTPListener:=THTTPListener.Create;
  WebStatusRegister(HTTPListener,'','',True);
  AboutStatus:=TWebAboutStatus.Create('About','/about',2);
- Log(AboutStatus.Name);
+ Log(Format('AboutStatus Caption %s Name %s',[AboutStatus.Caption,AboutStatus.Name]));
  HTTPListener.Active:=True;
 end;
 

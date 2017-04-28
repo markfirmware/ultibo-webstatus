@@ -40,7 +40,7 @@ class TcpChannel:
                 if data == "":
                     break
                 quiet = False
-                print len (data),
+#               print len (data),
                 self.logfile.write (data)
                 for c in data:
                     if c == '\r':
@@ -67,8 +67,8 @@ class TcpChannel:
                     else:
                         self.linebuffer = self.linebuffer + c
                 sleep (0.001, self.name)
-            if not quiet:
-                print 'done'
+#           if not quiet:
+#               print 'done'
 #           print 'done'
     def finishquit (self, process):
         while process.returncode == None:
