@@ -35,6 +35,12 @@ begin
          {$ifdef CONTROLLER_QEMUVPB}             QemuVpb {$endif};
 end;
 
+procedure Log(S:String);
+begin
+ LoggingOutput(S);
+ WriteLn(S);
+end;
+
 procedure StartLogging;
 begin
  if (Target = QemuVpb) then
@@ -84,7 +90,7 @@ begin
    Result:=Winsock2TCPClient.LocalAddress;
   end;
  Winsock2TCPClient.Free;
- LoggingOutput(Format('IP address %s',[Result]));
+ Log(Format('IP address %s',[Result]));
 end;
 
 procedure StartHttpServer;
@@ -99,7 +105,7 @@ var
  I:Cardinal;
 begin
  for I:=0 to ParamCount do
-  LoggingOutput(Format('Param %d = %s',[I,ParamStr(I)]));
+  Log(Format('Param %d = %s',[I,ParamStr(I)]));
 end;
 
 procedure Main;
@@ -107,13 +113,12 @@ begin
  DetermineEntryState;
  StartLogging;
  Sleep(1000);
- LoggingOutput('');
+ Log('');
  LogCommandLine;
  IpAddress:=GetIpAddress;
  StartHttpServer;
- LoggingOutput(Format('BoardType %s',[BoardTypeToString(BoardGetType)]));
- LoggingOutput(Format('Ultibo Release %s %s %s',[ULTIBO_RELEASE_DATE,ULTIBO_RELEASE_NAME,ULTIBO_RELEASE_VERSION]));
- ClrScr;
+ Log(Format('BoardType %s',[BoardTypeToString(BoardGetType)]));
+ Log(Format('Ultibo Release %s %s %s',[ULTIBO_RELEASE_DATE,ULTIBO_RELEASE_NAME,ULTIBO_RELEASE_VERSION]));
  if InService then
   while True do
    Sleep(1);
@@ -124,11 +129,10 @@ begin
   Main;
  except on E:Exception do
   begin
-   WriteLn(Format('Exception.Message %s',[E.Message]));
-   LoggingOutput(Format('Exception.Message %s',[E.Message]));
+   Log(Format('Exception.Message %s',[E.Message]));
    if InService then
     Sleep(5000);
   end;
  end;
- LoggingOutput('program stop');
+ Log('program stop');
 end.
