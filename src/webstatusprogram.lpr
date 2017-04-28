@@ -2,10 +2,10 @@ program WebStatusProgram;
 {$mode delphi}{$h+}
 
 uses
- {$ifdef TARGET_RPI_INCLUDING_RPI0}  BCM2835,BCM2708,PlatformRPi      {$endif}
- {$ifdef TARGET_RPI2_INCLUDING_RPI3} BCM2836,BCM2709,PlatformRPi2     {$endif}
- {$ifdef TARGET_RPI3}                BCM2837,BCM2710,PlatformRPi3     {$endif}
- {$ifdef TARGET_QEMUVPB}             QEMUVersatilePB,PlatformQemuVpb, {$endif}
+ {$ifdef CONTROLLER_RPI_INCLUDING_RPI0}  BCM2835,BCM2708,PlatformRPi      {$endif}
+ {$ifdef CONTROLLER_RPI2_INCLUDING_RPI3} BCM2836,BCM2709,PlatformRPi2     {$endif}
+ {$ifdef CONTROLLER_RPI3}                BCM2837,BCM2710,PlatformRPi3     {$endif}
+ {$ifdef CONTROLLER_QEMUVPB}             QEMUVersatilePB,PlatformQemuVpb, {$endif}
 
  Classes,Crt,GlobalConfig,GlobalConst,
  HTTP,Ip,Logging,Network,Platform,Serial,
@@ -29,10 +29,10 @@ var
 
 procedure DetermineEntryState;
 begin
- Target:={$ifdef TARGET_RPI_INCLUDING_RPI0}  Rpi     {$endif}
-         {$ifdef TARGET_RPI2_INCLUDING_RPI3} Rpi2    {$endif}
-         {$ifdef TARGET_RPI3}                Rpi3    {$endif}
-         {$ifdef TARGET_QEMUVPB}             QemuVpb {$endif};
+ Target:={$ifdef CONTROLLER_RPI_INCLUDING_RPI0}  Rpi     {$endif}
+         {$ifdef CONTROLLER_RPI2_INCLUDING_RPI3} Rpi2    {$endif}
+         {$ifdef CONTROLLER_RPI3}                Rpi3    {$endif}
+         {$ifdef CONTROLLER_QEMUVPB}             QemuVpb {$endif};
 end;
 
 procedure StartLogging;

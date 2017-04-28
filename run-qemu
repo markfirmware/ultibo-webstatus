@@ -2,7 +2,7 @@
 
 import os, parse, select, shutil, socket, subprocess, sys, time
 
-outputfolder = 'run-qemu-output'
+outputfolder = 'test'
 
 class TcpChannel:
     def __init__ (self, name, port):

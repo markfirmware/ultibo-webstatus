@@ -16,5 +16,5 @@ stages:
         command: ls -ltR
       - name: Save artifacts
         type: artifacts-store
-        path: build-output
+        path: artifacts
         destination: ultibo-webstatus
