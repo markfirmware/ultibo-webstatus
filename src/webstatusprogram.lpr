@@ -113,6 +113,7 @@ begin
  HTTPListener:=THTTPListener.Create;
  WebStatusRegister(HTTPListener,'','',True);
  AboutStatus:=TWebAboutStatus.Create('About','/about',2);
+ HTTPListener.RegisterDocument('',AboutStatus);
  Log(Format('AboutStatus Caption %s Name %s',[AboutStatus.Caption,AboutStatus.Name]));
  HTTPListener.Active:=True;
 end;
