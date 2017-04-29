@@ -88,11 +88,18 @@ def bash (lines):
 bash (['rm -rf {}/'.format (outputfolder),
        'mkdir -p {}'.format (outputfolder)])
 
+def g (name):
+    return os.environ ['CIRCLE_'+ name]
+
+cmdline = 'postbuildtest'
+if os.environ.has_key ('CIRCLECI'):
+    cmdline += ' username={} project={} branch={} buildnumber={}'.format (g ('PROJECT_USERNAME'), g ('PROJECT_REPONAME'), g ('BRANCH'), g ('BUILD_NUM'))
+
 qemuprocess = subprocess.Popen (["qemu-system-arm",
                                  "-M", "versatilepb",
                                  "-cpu", "cortex-a8",
                                  "-kernel", "kernel.bin",
-                                 "-append", 'postbuildtest',
+                                 "-append", cmdline,
                                  "-m", "256M",
                                  "-usb",
                                  "-net", "nic",

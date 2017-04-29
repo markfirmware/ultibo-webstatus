@@ -8,17 +8,17 @@ project = 'ultibo-webstatus'
 branch = 'test-20170425'
 ports = ['5080:80']
 
-def getbuild (username, project, branch):
-    global artifacts, circle, kernelpath
+def getbuild (circle, username, project, branch):
+    global artifacts, kernelpath, buildnumber
     builds = circle.build.recent (username, project, branch=branch)
     build = builds [0]
-    build_num = build ['build_num']
-    print username, project, 'build', build_num, build ['status']
+    buildnumber = build ['build_num']
+    print username, project, 'build', buildnumber, build ['status']
     if not (build ['status'] in ['fixed', 'success']):
         return False
-    artifacts = circle.build.artifacts (username, project, build_num)
+    artifacts = circle.build.artifacts (username, project, buildnumber)
     artifacts = sorted (artifacts, key = lambda a: a ['pretty_path'])
-    e = os.path.join ('artifacts', 'build-' + str (build_num))
+    e = os.path.join ('artifacts', 'build-' + str (buildnumber))
     if os.path.exists (e):
         shutil.rmtree (e)
     for a in artifacts:
@@ -39,10 +39,13 @@ def getbuild (username, project, branch):
     return True
 
 def runqemu (kernelpath):
+    global buildnumber
+    cmdline = 'username={} project={} branch={} buildnumber={}'.format (username, project, branch, buildnumber)
     qemu = subprocess.Popen (["qemu-system-arm",
                               "-M", "versatilepb",
                               "-cpu", "cortex-a8",
                               "-kernel", kernelpath,
+                              "-append", cmdline,
                               "-m", "256M",
                               "-serial", "stdio",
                               "-usb",
@@ -59,10 +62,10 @@ def runqemu (kernelpath):
             break
 
 def main ():
-    global circle, kernelpath
+    global kernelpath
     circle = circleclient.CircleClient ('')
     while True:
-        while not getbuild (username, project, branch):
+        while not getbuild (circle, username, project, branch):
             time.sleep (30)
         runqemu (kernelpath)
 
