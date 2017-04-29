@@ -73,6 +73,9 @@ function test-qemu-controller {
 
 function build-ultibo-webstatus {
     build-as QEMUVPB src
+    build-as RPI src
+    build-as RPI2 src
+    build-as RPI3 src
 }
 
 function build-as {
@@ -111,7 +114,7 @@ function build-lpr {
     local CONTROLLER_COMPILER_OPTIONS=$5
     local CFG_NAME=$6
     local INCLUDES="-Fi/root/ultibo/core/fpc/source/packages/fv/src -Fi/root/ultibo/core/fpc/source/rtl/ultibo/core"
-    log .... building $LPR_FILE
+    log .... building $LPR_FILE $CONTROLLER
     mkdir -p $ARTIFACTS/$CONTROLLER $OBJ/$CONTROLLER && \
     ultibo-bash fpc \
      -d$CONTROLLER_SYMBOL \
