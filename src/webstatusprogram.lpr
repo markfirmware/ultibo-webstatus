@@ -103,7 +103,7 @@ begin
  Log('About DoContent');
  AddItem(AResponse,'vnc','host 45.79.200.166 port 5970');
  AddItem(AResponse,'browser vnc',MakeLink('use host 45.79.200.166 port 5770 - note port 5770, not 5970','http://novnc.com/noVNC/vnc.html'));
- AddItem(AResponse,'CircleCI Build:',MakeLink('Build #24 markfirmware/ultibo-webstatus (branch test-20170425)','https://circleci.com/gh/markfirmware/ultibo-webstatus/24#artifacts/containers/0'));
+ AddItem(AResponse,'CircleCI Build:',MakeLink('Build #25 markfirmware/ultibo-webstatus (branch test-20170425)','https://circleci.com/gh/markfirmware/ultibo-webstatus/25#artifacts/containers/0'));
  AddItem(AResponse,'GitHub Source:',MakeLink('markfirmware/ultibo-webstatus (branch test-20170425)','https://github.com/markfirmware/ultibo-webstatus/tree/test-20170425'));
  Result:=True;
 end;
@@ -132,6 +132,7 @@ procedure Main;
 var
  MouseData:TMouseData;
  MouseCount:Cardinal;
+ X,Y:Cardinal;
 begin
  DetermineEntryState;
  StartLogging;
@@ -146,8 +147,11 @@ begin
   while True do
    if MouseRead(@MouseData,SizeOf(TMouseData),MouseCount) = ERROR_SUCCESS then
     begin
+     X:=WhereX;
+     Y:=WhereY;
      GotoXY(80,1);
      Write(Format('%d %d      ',[MouseData.OffsetX,MouseData.OffsetY]));
+     GotoXY(X,Y);
     end;
 end;
 
