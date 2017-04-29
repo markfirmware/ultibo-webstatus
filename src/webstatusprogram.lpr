@@ -2,9 +2,9 @@ program WebStatusProgram;
 {$mode delphi}{$h+}
 
 uses
- {$ifdef CONTROLLER_RPI_INCLUDING_RPI0}  BCM2835,BCM2708,PlatformRPi      {$endif}
- {$ifdef CONTROLLER_RPI2_INCLUDING_RPI3} BCM2836,BCM2709,PlatformRPi2     {$endif}
- {$ifdef CONTROLLER_RPI3}                BCM2837,BCM2710,PlatformRPi3     {$endif}
+ {$ifdef CONTROLLER_RPI_INCLUDING_RPI0}  BCM2835,BCM2708,PlatformRPi,     {$endif}
+ {$ifdef CONTROLLER_RPI2_INCLUDING_RPI3} BCM2836,BCM2709,PlatformRPi2,    {$endif}
+ {$ifdef CONTROLLER_RPI3}                BCM2837,BCM2710,PlatformRPi3,    {$endif}
  {$ifdef CONTROLLER_QEMUVPB}             QEMUVersatilePB,PlatformQemuVpb, {$endif}
 
  Classes,Crt,GlobalConfig,GlobalConst,
@@ -12,24 +12,24 @@ uses
  StrUtils,SysUtils,Ultibo,WebStatus,Winsock2;
 
 type
- TTarget = (Rpi, Rpi2, Rpi3, QemuVpb);
+ TController = (Rpi, Rpi2, Rpi3, QemuVpb);
 
-function TargetToString(Target:TTarget):String;
+function ControllerToString(Controller:TController):String;
 begin
- case Target of
-  Rpi: TargetToString:='Rpi';
-  Rpi2: TargetToString:='Rpi2';
-  Rpi3: TargetToString:='Rpi3';
-  QemuVpb: TargetToString:='QemuVpb';
+ case Controller of
+  Rpi: ControllerToString:='Rpi';
+  Rpi2: ControllerToString:='Rpi2';
+  Rpi3: ControllerToString:='Rpi3';
+  QemuVpb: ControllerToString:='QemuVpb';
  end;
 end;
 
 var
- Target:TTarget;
+ Controller:TController;
 
 procedure DetermineEntryState;
 begin
- Target:={$ifdef CONTROLLER_RPI_INCLUDING_RPI0}  Rpi     {$endif}
+ Controller:={$ifdef CONTROLLER_RPI_INCLUDING_RPI0}  Rpi     {$endif}
          {$ifdef CONTROLLER_RPI2_INCLUDING_RPI3} Rpi2    {$endif}
          {$ifdef CONTROLLER_RPI3}                Rpi3    {$endif}
          {$ifdef CONTROLLER_QEMUVPB}             QemuVpb {$endif};
@@ -43,7 +43,7 @@ end;
 
 procedure StartLogging;
 begin
- if (Target = QemuVpb) then
+ if (Controller = QemuVpb) then
   begin
    SERIAL_REGISTER_LOGGING:=True;
    SerialLoggingDeviceAdd(SerialDeviceGetDefault);
@@ -101,7 +101,8 @@ type
 function TWebAboutStatus.DoContent(AHost:THTTPHost;ARequest:THTTPServerRequest;AResponse:THTTPServerResponse):Boolean; 
 begin
  Log('About DoContent');
- AddItem(AResponse,'Source:',MakeLink('repo','http://github.com/markfirmware/ultibo-webstatus'));
+ AddItem(AResponse,'Build:',MakeLink('circleci (build 17) markfirmware/ultibo-webstatus (branch test-20170425)','https://circleci.com/gh/markfirmware/ultibo-webstatus/17'));
+ AddItem(AResponse,'Source:',MakeLink('github markfirmware/ultibo-webstatus (branch test-20170425)','https://github.com/markfirmware/ultibo-webstatus/tree/test-20170425'));
  Result:=True;
 end;
 
@@ -114,7 +115,6 @@ begin
  WebStatusRegister(HTTPListener,'','',True);
  AboutStatus:=TWebAboutStatus.Create('About','/about',2);
  HTTPListener.RegisterDocument('',AboutStatus);
- Log(Format('AboutStatus Caption %s Name %s',[AboutStatus.Caption,AboutStatus.Name]));
  HTTPListener.Active:=True;
 end;
 
