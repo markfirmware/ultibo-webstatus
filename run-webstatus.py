@@ -51,7 +51,7 @@ def runqemu (kernelpath):
                               "-usb",
                               "-net", "nic",
                               "-net", "user,hostfwd=tcp::5080-:80",
-                              "-display", "none"],
+                              "-vnc", ":70,websocket"],
                              stdin=subprocess.PIPE,
                              stdout=subprocess.PIPE,
                              stderr=subprocess.PIPE)

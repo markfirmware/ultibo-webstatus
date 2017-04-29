@@ -8,7 +8,7 @@ uses
  {$ifdef CONTROLLER_QEMUVPB}             QEMUVersatilePB,PlatformQemuVpb, {$endif}
 
  Classes,Crt,GlobalConfig,GlobalConst,
- HTTP,Ip,Logging,Network,Platform,Serial,
+ HTTP,Ip,Logging,Mouse,Network,Platform,Serial,
  StrUtils,SysUtils,Ultibo,WebStatus,Winsock2;
 
 type
@@ -101,7 +101,9 @@ type
 function TWebAboutStatus.DoContent(AHost:THTTPHost;ARequest:THTTPServerRequest;AResponse:THTTPServerResponse):Boolean; 
 begin
  Log('About DoContent');
- AddItem(AResponse,'CircleCI Build:',MakeLink('Build #22 markfirmware/ultibo-webstatus (branch test-20170425)','https://circleci.com/gh/markfirmware/ultibo-webstatus/22#artifacts/containers/0'));
+ AddItem(AResponse,'vnc','host 45.79.200.166 port 5970');
+ AddItem(AResponse,'browser vnc',MakeLink('use host 45.79.200.166 port 5770 - note port 5770, not 5970','http://novnc.com/noVNC/vnc.html'));
+ AddItem(AResponse,'CircleCI Build:',MakeLink('Build #23 markfirmware/ultibo-webstatus (branch test-20170425)','https://circleci.com/gh/markfirmware/ultibo-webstatus/23#artifacts/containers/0'));
  AddItem(AResponse,'GitHub Source:',MakeLink('markfirmware/ultibo-webstatus (branch test-20170425)','https://github.com/markfirmware/ultibo-webstatus/tree/test-20170425'));
  Result:=True;
 end;
@@ -127,6 +129,9 @@ begin
 end;
 
 procedure Main;
+var
+ MouseData:TMouseData;
+ MouseCount:Cardinal;
 begin
  DetermineEntryState;
  StartLogging;
@@ -139,7 +144,11 @@ begin
  Log(Format('Ultibo Release %s %s %s',[ULTIBO_RELEASE_DATE,ULTIBO_RELEASE_NAME,ULTIBO_RELEASE_VERSION]));
  if InService then
   while True do
-   Sleep(1);
+   if MouseRead(@MouseData,SizeOf(TMouseData),MouseCount) = ERROR_SUCCESS then
+    begin
+     GotoXY(20,20);
+     Write(Format('%d %d      ',[MouseData.OffsetX,MouseData.OffsetY]));
+    end;
 end;
 
 begin
