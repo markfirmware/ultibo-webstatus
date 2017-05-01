@@ -82,7 +82,6 @@ function GetIpAddress:String;
 var
  Winsock2TCPClient:TWinsock2TCPClient;
 begin
- Sleep(3 * 1000);
  Log('Obtaining IP address ...');
  Winsock2TCPClient:=TWinsock2TCPClient.Create;
  Result:=Winsock2TCPClient.LocalAddress;
