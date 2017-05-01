@@ -103,7 +103,7 @@ begin
  Log('TWebAboutStatus.DoContent');
  AddItem(AResponse,'QEMU vnc server','host 45.79.200.166 port 5970');
  AddItem(AResponse,'Web Browser vncviewer',MakeLink('use host 45.79.200.166 port 5770 - note port 5770, not 5970','http://novnc.com/noVNC/vnc.html'));
- AddItem(AResponse,'CircleCI Build:',MakeLink('Build #32 markfirmware/ultibo-webstatus (branch test-20170425)','https://circleci.com/gh/markfirmware/ultibo-webstatus/32#artifacts/containers/0'));
+ AddItem(AResponse,'CircleCI Build:',MakeLink('Build #33 markfirmware/ultibo-webstatus (branch test-20170425)','https://circleci.com/gh/markfirmware/ultibo-webstatus/33#artifacts/containers/0'));
  AddItem(AResponse,'GitHub Source:',MakeLink('markfirmware/ultibo-webstatus (branch test-20170425)','https://github.com/markfirmware/ultibo-webstatus/tree/test-20170425'));
  Result:=True;
 end;
@@ -129,12 +129,16 @@ begin
 end;
 
 procedure SystemReset;
+var
+ SysResetRegister:LongWord;
 begin
  {$ifdef CONTROLLER_QEMUVPB}
   WriteLn('System Reset Requested');
   Sleep(1*1000);
   PLongWord(VERSATILEPB_SYS_LOCK)^:=$a05f;
-  PLongWord(VERSATILEPB_SYS_RESETCTL)^:=$4;
+  SysResetRegister:=PLongWord(VERSATILEPB_SYS_LOCK)^;
+  SysResetRegister:=SysResetRegister or $105;
+  PLongWord(VERSATILEPB_SYS_RESETCTL)^:=SysResetRegister;
   PLongWord(VERSATILEPB_SYS_LOCK)^:=$0;
  {$endif} 
 end;
