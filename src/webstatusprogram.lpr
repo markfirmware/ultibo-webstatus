@@ -154,17 +154,19 @@ begin
  Log(Format('Ultibo Release %s %s %s',[ULTIBO_RELEASE_DATE,ULTIBO_RELEASE_NAME,ULTIBO_RELEASE_VERSION]));
  if InService then
   while True do
-   if KeyPressed then
-    if ReadKey = 'r' then
-     SystemReset;
-   if MouseRead(@MouseData,SizeOf(TMouseData),MouseCount) = ERROR_SUCCESS then
-    begin
-     X:=WhereX;
-     Y:=WhereY;
-     GotoXY(80,1);
-     Write(Format('%d %d      ',[MouseData.OffsetX,MouseData.OffsetY]));
-     GotoXY(X,Y);
-    end;
+   begin
+    if KeyPressed then
+     if ReadKey = 'r' then
+      SystemReset;
+    if MouseRead(@MouseData,SizeOf(TMouseData),MouseCount) = ERROR_SUCCESS then
+     begin
+      X:=WhereX;
+      Y:=WhereY;
+      GotoXY(80,1);
+      Write(Format('%d %d      ',[MouseData.OffsetX,MouseData.OffsetY]));
+      GotoXY(X,Y);
+     end;
+   end;
 end;
 
 begin
