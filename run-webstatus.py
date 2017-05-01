@@ -55,11 +55,18 @@ def runqemu (kernelpath):
                              stdin=subprocess.PIPE,
                              stdout=subprocess.PIPE,
                              stderr=subprocess.PIPE)
-    while True:
+    while qemu.poll () == None:
         line = qemu.stdout.readline ()
         print line,
         if 'program stop' in line:
             break
+        if 'system reset requested' in line:
+            print 'detected system reset request'
+            time.sleep (3.0)
+            if not qemu.stdout.read (1):
+                print 'system reset seems to have failed - restarting qemu'
+                qemu.terminate ()
+        time.sleep (0.01)
 
 def main ():
     global kernelpath
