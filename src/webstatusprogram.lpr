@@ -93,6 +93,27 @@ begin
  Log(Format('IP address %s',[Result]));
 end;
 
+var
+ BuildNumber:Cardinal;
+
+procedure ParseCommandLine;
+var
+ I,Start:Cardinal;
+ Param:String;
+begin
+ for I:=0 to ParamCount do
+  begin
+   Param:=ParamStr(I);
+   Log(Format('Param %d = %s',[I,Param]));
+   if AnsiStartsStr('buildnumber=',Param) then
+    begin
+     Start:=PosEx('=',Param);
+     BuildNumber:=StrToInt(MidStr(Param,Start + 1,Length(Param) - Start));
+     Log(Format('Build Number %d',[BuildNumber]));
+    end;
+  end;
+end;
+
 type
  TWebAboutStatus = class (TWebStatusCustom)
   function DoContent(AHost:THTTPHost;ARequest:THTTPServerRequest;AResponse:THTTPServerResponse):Boolean; override;
@@ -103,7 +124,7 @@ begin
  Log('TWebAboutStatus.DoContent');
  AddItem(AResponse,'QEMU vnc server','host 45.79.200.166 port 5970');
  AddItem(AResponse,'Web Browser vncviewer',MakeLink('use host 45.79.200.166 port 5770 - note port 5770, not 5970','http://novnc.com/noVNC/vnc.html'));
- AddItem(AResponse,'CircleCI Build:',MakeLink('Build #33 markfirmware/ultibo-webstatus (branch test-20170425)','https://circleci.com/gh/markfirmware/ultibo-webstatus/33#artifacts/containers/0'));
+ AddItem(AResponse,'CircleCI Build:',MakeLink(Format('Build #%d markfirmware/ultibo-webstatus (branch test-20170425)',[BuildNumber]),Format('https://circleci.com/gh/markfirmware/ultibo-webstatus/%d#artifacts/containers/0',[BuildNumber])));
  AddItem(AResponse,'GitHub Source:',MakeLink('markfirmware/ultibo-webstatus (branch test-20170425)','https://github.com/markfirmware/ultibo-webstatus/tree/test-20170425'));
  Result:=True;
 end;
@@ -120,14 +141,6 @@ begin
  HTTPListener.Active:=True;
 end;
 
-procedure LogCommandLine;
-var
- I:Cardinal;
-begin
- for I:=0 to ParamCount do
-  Log(Format('Param %d = %s',[I,ParamStr(I)]));
-end;
-
 procedure SystemReset;
 {$ifdef CONTROLLER_QEMUVPB}
 var
@@ -135,7 +148,7 @@ var
 {$endif} 
 begin
  {$ifdef CONTROLLER_QEMUVPB}
-  WriteLn('System Reset Requested');
+  Log('System Reset Requested');
   Sleep(1*1000);
   PLongWord(VERSATILEPB_SYS_LOCK)^:=$a05f;
   SysResetRegister:=PLongWord(VERSATILEPB_SYS_LOCK)^;
@@ -152,11 +165,12 @@ var
  X,Y:Cardinal;
  Key:Char;
 begin
+ BuildNumber:=0;
  DetermineEntryState;
  StartLogging;
  Sleep(1000);
  Log('');
- LogCommandLine;
+ ParseCommandLine;
  IpAddress:=GetIpAddress;
  StartHttpServer;
  Log(Format('BoardType %s',[BoardTypeToString(BoardGetType)]));
