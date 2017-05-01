@@ -185,11 +185,18 @@ begin
  ParseCommandLine;
  Log(Format('BoardType %s',[BoardTypeToString(BoardGetType)]));
  Log(Format('Ultibo Release %s %s %s',[ULTIBO_RELEASE_DATE,ULTIBO_RELEASE_NAME,ULTIBO_RELEASE_VERSION]));
- IpAddress:=GetIpAddress;
  if Controller = QemuVpb then
-  EffectiveIpAddress:=QemuHostIpAddress
+  begin
+   Log('');
+   Log(Format('Effective IP Address (running under QEMU) is %s',[EffectiveIpAddress]));
+   Log('');
+   EffectiveIpAddress:=QemuHostIpAddress
+  end
  else
-  EffectiveIpAddress:=IpAddress;
+  begin
+   IpAddress:=GetIpAddress;
+   EffectiveIpAddress:=IpAddress;
+  end;
  StartHttpServer;
  Log('');
  Log('r key will reset system');
