@@ -2,10 +2,10 @@ program WebStatusProgram;
 {$mode delphi}{$h+}
 
 uses
- {$ifdef CONTROLLER_RPI_INCLUDING_RPI0}  BCM2835,BCM2708,PlatformRPi,     {$endif}
- {$ifdef CONTROLLER_RPI2_INCLUDING_RPI3} BCM2836,BCM2709,PlatformRPi2,    {$endif}
- {$ifdef CONTROLLER_RPI3}                BCM2837,BCM2710,PlatformRPi3,    {$endif}
- {$ifdef CONTROLLER_QEMUVPB}             QEMUVersatilePB,PlatformQemuVpb, {$endif}
+ {$ifdef CONTROLLER_RPI_INCLUDING_RPI0}  BCM2835,BCM2708,PlatformRPi,                 {$endif}
+ {$ifdef CONTROLLER_RPI2_INCLUDING_RPI3} BCM2836,BCM2709,PlatformRPi2,                {$endif}
+ {$ifdef CONTROLLER_RPI3}                BCM2837,BCM2710,PlatformRPi3,                {$endif}
+ {$ifdef CONTROLLER_QEMUVPB}             QEMUVersatilePB,PlatformQemuVpb,VersatilePB, {$endif}
 
  Classes,Crt,GlobalConfig,GlobalConst,
  HTTP,Ip,Logging,Mouse,Network,Platform,Serial,
@@ -100,9 +100,9 @@ type
 
 function TWebAboutStatus.DoContent(AHost:THTTPHost;ARequest:THTTPServerRequest;AResponse:THTTPServerResponse):Boolean; 
 begin
- Log('About DoContent');
- AddItem(AResponse,'vnc','host 45.79.200.166 port 5970');
- AddItem(AResponse,'browser vnc',MakeLink('use host 45.79.200.166 port 5770 - note port 5770, not 5970','http://novnc.com/noVNC/vnc.html'));
+ Log('TWebAboutStatus.DoContent');
+ AddItem(AResponse,'QEMU vnc server','host 45.79.200.166 port 5970');
+ AddItem(AResponse,'Web Browser vncviewer',MakeLink('use host 45.79.200.166 port 5770 - note port 5770, not 5970','http://novnc.com/noVNC/vnc.html'));
  AddItem(AResponse,'CircleCI Build:',MakeLink('Build #25 markfirmware/ultibo-webstatus (branch test-20170425)','https://circleci.com/gh/markfirmware/ultibo-webstatus/25#artifacts/containers/0'));
  AddItem(AResponse,'GitHub Source:',MakeLink('markfirmware/ultibo-webstatus (branch test-20170425)','https://github.com/markfirmware/ultibo-webstatus/tree/test-20170425'));
  Result:=True;
@@ -128,6 +128,15 @@ begin
   Log(Format('Param %d = %s',[I,ParamStr(I)]));
 end;
 
+procedure SystemReset;
+begin
+ {$ifdef CONTROLLER_QEMUVPB}
+  PLongWord(VERSATILEPB_SYS_LOCK)^:=$a05f;
+  PLongWord(VERSATILEPB_SYS_RESETCTL)^:=$4;
+  PLongWord(VERSATILEPB_SYS_LOCK)^:=$0;
+ {$endif} 
+end;
+
 procedure Main;
 var
  MouseData:TMouseData;
@@ -145,6 +154,9 @@ begin
  Log(Format('Ultibo Release %s %s %s',[ULTIBO_RELEASE_DATE,ULTIBO_RELEASE_NAME,ULTIBO_RELEASE_VERSION]));
  if InService then
   while True do
+   if KeyPressed then
+    if ReadKey = 'r' then
+     SystemReset;
    if MouseRead(@MouseData,SizeOf(TMouseData),MouseCount) = ERROR_SUCCESS then
     begin
      X:=WhereX;
