@@ -152,7 +152,7 @@ begin
   Sleep(1*1000);
   PLongWord(VERSATILEPB_SYS_LOCK)^:=$a05f;
   SysResetRegister:=PLongWord(VERSATILEPB_SYS_LOCK)^;
-  SysResetRegister:=$4; //SysResetRegister or $105;
+  SysResetRegister:=SysResetRegister or $105;
   PLongWord(VERSATILEPB_SYS_RESETCTL)^:=SysResetRegister;
   PLongWord(VERSATILEPB_SYS_LOCK)^:=$0;
  {$endif} 
