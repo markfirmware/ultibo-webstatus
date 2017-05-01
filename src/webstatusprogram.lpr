@@ -131,6 +131,8 @@ end;
 procedure SystemReset;
 begin
  {$ifdef CONTROLLER_QEMUVPB}
+  WriteLn('System Reset Requested');
+  Sleep(1*1000);
   PLongWord(VERSATILEPB_SYS_LOCK)^:=$a05f;
   PLongWord(VERSATILEPB_SYS_RESETCTL)^:=$4;
   PLongWord(VERSATILEPB_SYS_LOCK)^:=$0;
@@ -159,9 +161,11 @@ begin
     if KeyPressed then
      begin
       Key:=ReadKey;
-      WriteLn(Key);
+      WriteLn(Format('KeyPressed %s',[Key]));
       if Key = 'r' then
+       begin
         SystemReset;
+       end;
      end;
     if MouseRead(@MouseData,SizeOf(TMouseData),MouseCount) = ERROR_SUCCESS then
      begin
