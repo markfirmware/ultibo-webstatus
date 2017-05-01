@@ -129,8 +129,10 @@ begin
 end;
 
 procedure SystemReset;
+{$ifdef CONTROLLER_QEMUVPB}
 var
  SysResetRegister:LongWord;
+{$endif} 
 begin
  {$ifdef CONTROLLER_QEMUVPB}
   WriteLn('System Reset Requested');
