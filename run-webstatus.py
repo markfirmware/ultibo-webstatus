@@ -66,7 +66,7 @@ def runqemu (kernelpath):
             if a == []:
                 print 'system reset seems to have failed - restarting qemu'
                 while True:
-                    (a, b, c) = select.select ([qemu.stderr], [], [], 1.0)
+                    (a, b, c) = select.select ([qemu.stderr], [], [], 3.0)
                     if a == []:
                         break
                     print qemu.stderr.read (1),
