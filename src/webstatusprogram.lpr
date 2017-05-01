@@ -90,6 +90,7 @@ begin
    Result:=Winsock2TCPClient.LocalAddress;
   end;
  Winsock2TCPClient.Free;
+ Log('Obtaining IP address');
  Log(Format('IP address %s',[Result]));
 end;
 
@@ -148,6 +149,7 @@ var
 {$endif} 
 begin
  {$ifdef CONTROLLER_QEMUVPB}
+  Log('');
   Log('system reset requested');
   Sleep(1*1000);
   PLongWord(VERSATILEPB_SYS_LOCK)^:=$a05f;
@@ -171,10 +173,13 @@ begin
  Sleep(1000);
  Log('');
  ParseCommandLine;
- IpAddress:=GetIpAddress;
- StartHttpServer;
  Log(Format('BoardType %s',[BoardTypeToString(BoardGetType)]));
  Log(Format('Ultibo Release %s %s %s',[ULTIBO_RELEASE_DATE,ULTIBO_RELEASE_NAME,ULTIBO_RELEASE_VERSION]));
+ IpAddress:=GetIpAddress;
+ StartHttpServer;
+ Log ('');
+ Log('Ready and waiting for input ...');
+ Log ('');
  if InService then
   while True do
    begin

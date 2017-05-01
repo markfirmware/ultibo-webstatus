@@ -62,8 +62,8 @@ def runqemu (kernelpath):
             break
         if 'system reset requested' in line:
             print 'detected system reset request'
-            time.sleep (3.0)
-            if not qemu.stdout.read (1):
+            (a, b, c) = select.select ([qemu.stdout], [], [], 3.0)
+            if a == []:
                 print 'system reset seems to have failed - restarting qemu'
                 qemu.terminate ()
         time.sleep (0.01)
