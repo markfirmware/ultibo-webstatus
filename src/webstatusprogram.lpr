@@ -187,10 +187,10 @@ begin
  Log(Format('Ultibo Release %s %s %s',[ULTIBO_RELEASE_DATE,ULTIBO_RELEASE_NAME,ULTIBO_RELEASE_VERSION]));
  if Controller = QemuVpb then
   begin
+   EffectiveIpAddress:=QemuHostIpAddress
    Log('');
    Log(Format('Effective IP Address (running under QEMU) is %s',[EffectiveIpAddress]));
    Log('');
-   EffectiveIpAddress:=QemuHostIpAddress
   end
  else
   begin
