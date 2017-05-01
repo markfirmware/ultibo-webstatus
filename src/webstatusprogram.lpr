@@ -76,6 +76,7 @@ end;
 
 var
  IpAddress:String;
+ EffectiveIpAddress:String;
  HTTPListener:THTTPListener;
 
 function GetIpAddress:String;
@@ -97,6 +98,7 @@ end;
 
 var
  BuildNumber:Cardinal;
+ QemuHostIpAddress:String;
 
 procedure ParseCommandLine;
 var
@@ -113,6 +115,12 @@ begin
      BuildNumber:=StrToInt(MidStr(Param,Start + 1,Length(Param) - Start));
      Log(Format('Build Number %d',[BuildNumber]));
     end;
+   if AnsiStartsStr('qemuhostip=',Param) then
+    begin
+     Start:=PosEx('=',Param);
+     QemuHostIpAddress:=MidStr(Param,Start + 1,Length(Param) - Start);
+     Log(Format('QEMU Host IP %s',[QemuHostIpAddress]));
+    end;
   end;
 end;
 
@@ -124,8 +132,8 @@ type
 function TWebAboutStatus.DoContent(AHost:THTTPHost;ARequest:THTTPServerRequest;AResponse:THTTPServerResponse):Boolean; 
 begin
  Log('TWebAboutStatus.DoContent');
- AddItem(AResponse,'QEMU vnc server','host 45.79.200.166 port 5970');
- AddItem(AResponse,'Web Browser vncviewer',MakeLink('use host 45.79.200.166 port 5770 - note port 5770, not 5970','http://novnc.com/noVNC/vnc.html'));
+ AddItem(AResponse,'QEMU vnc server',Format('host %s port 5970',[EffectiveIpAddress]));
+ AddItem(AResponse,'Web Browser vncviewer',MakeLink(Format('use host %s port 5770 - note port 5770, not 5970',[EffectiveIpAddress]),'http://novnc.com/noVNC/vnc.html'));
  AddItem(AResponse,'CircleCI Build:',MakeLink(Format('Build #%d markfirmware/ultibo-webstatus (branch test-20170425)',[BuildNumber]),Format('https://circleci.com/gh/markfirmware/ultibo-webstatus/%d#artifacts/containers/0',[BuildNumber])));
  AddItem(AResponse,'GitHub Source:',MakeLink('markfirmware/ultibo-webstatus (branch test-20170425)','https://github.com/markfirmware/ultibo-webstatus/tree/test-20170425'));
  Result:=True;
@@ -169,6 +177,7 @@ var
  Key:Char;
 begin
  BuildNumber:=0;
+ QemuHostIpAddress:='';
  DetermineEntryState;
  StartLogging;
  Sleep(1000);
@@ -177,6 +186,10 @@ begin
  Log(Format('BoardType %s',[BoardTypeToString(BoardGetType)]));
  Log(Format('Ultibo Release %s %s %s',[ULTIBO_RELEASE_DATE,ULTIBO_RELEASE_NAME,ULTIBO_RELEASE_VERSION]));
  IpAddress:=GetIpAddress;
+ if Controller = QemuVpb then
+  EffectiveIpAddress:=QemuHostIpAddress
+ else
+  EffectiveIpAddress:=IpAddress;
  StartHttpServer;
  Log('');
  Log('r key will reset system');

@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import git, json, os, parse, requests, select, shutil, socket, subprocess, sys, time
+import fcntl, json, os, requests, select, shutil, socket, struct, subprocess, sys, time
 from circleclient import circleclient
 
 username = 'markfirmware'
@@ -38,9 +38,17 @@ def getbuild (circle, username, project, branch):
                 fd.write (chunk)
     return True
 
+def get_ip_address(ifname):
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    return socket.inet_ntoa(fcntl.ioctl(
+        s.fileno(),
+        0x8915,  # SIOCGIFADDR
+        struct.pack('256s', ifname[:15])
+    )[20:24])
+
 def runqemu (kernelpath):
     global buildnumber
-    cmdline = 'username={} project={} branch={} buildnumber={}'.format (username, project, branch, buildnumber)
+    cmdline = 'qemuhostip={} username={} project={} branch={} buildnumber={}'.format (get_ip_address ('eth0'), username, project, branch, buildnumber)
     qemu = subprocess.Popen (["qemu-system-arm",
                               "-M", "versatilepb",
                               "-cpu", "cortex-a8",
