@@ -103,7 +103,7 @@ begin
  Log('TWebAboutStatus.DoContent');
  AddItem(AResponse,'QEMU vnc server','host 45.79.200.166 port 5970');
  AddItem(AResponse,'Web Browser vncviewer',MakeLink('use host 45.79.200.166 port 5770 - note port 5770, not 5970','http://novnc.com/noVNC/vnc.html'));
- AddItem(AResponse,'CircleCI Build:',MakeLink('Build #30 markfirmware/ultibo-webstatus (branch test-20170425)','https://circleci.com/gh/markfirmware/ultibo-webstatus/30#artifacts/containers/0'));
+ AddItem(AResponse,'CircleCI Build:',MakeLink('Build #32 markfirmware/ultibo-webstatus (branch test-20170425)','https://circleci.com/gh/markfirmware/ultibo-webstatus/32#artifacts/containers/0'));
  AddItem(AResponse,'GitHub Source:',MakeLink('markfirmware/ultibo-webstatus (branch test-20170425)','https://github.com/markfirmware/ultibo-webstatus/tree/test-20170425'));
  Result:=True;
 end;
