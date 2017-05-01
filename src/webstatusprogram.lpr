@@ -82,6 +82,7 @@ function GetIpAddress:String;
 var
  Winsock2TCPClient:TWinsock2TCPClient;
 begin
+ Log('');
  Log('Obtaining IP address ...');
  Winsock2TCPClient:=TWinsock2TCPClient.Create;
  Result:=Winsock2TCPClient.LocalAddress;
@@ -177,7 +178,9 @@ begin
  Log(Format('Ultibo Release %s %s %s',[ULTIBO_RELEASE_DATE,ULTIBO_RELEASE_NAME,ULTIBO_RELEASE_VERSION]));
  IpAddress:=GetIpAddress;
  StartHttpServer;
- Log ('');
+ Log('');
+ Log('r key will reset system');
+ Log('Note that if connected through vnc, the mouse must be moved to push the key through');
  Log('Ready and waiting for input ...');
  Log ('');
  if InService then
