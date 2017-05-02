@@ -70,6 +70,7 @@ def runqemu (kernelpath):
             break
         if 'system reset requested' in line:
             print 'detected system reset request'
+            time.sleep (1)
             if not waitforstart ():
                 print 'system reset seems to have failed - restarting qemu'
                 break
