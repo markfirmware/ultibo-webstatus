@@ -79,7 +79,7 @@ def waitforstart ():
     global qemu
     linebuffer = ''
     started = False
-    while ([], [], []) != select.select ([qemu.stdout], [], [], 3.0):
+    while not started and ([], [], []) != select.select ([qemu.stdout], [], [], 3.0):
         try:
             data = qemu.stdout.read (1)
         except:
@@ -93,7 +93,7 @@ def waitforstart ():
                 print linebuffer
                 if 'program start' in linebuffer:
                     started = True
-                    break
+                linebuffer = ''
             else:
                 linebuffer += c
     return started
