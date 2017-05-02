@@ -160,7 +160,7 @@ begin
  {$ifdef CONTROLLER_QEMUVPB}
   Log('');
   Log('system reset requested');
-  Sleep(1*1000);
+  Sleep(500);
   PLongWord(VERSATILEPB_SYS_LOCK)^:=$a05f;
   SysResetRegister:=PLongWord(VERSATILEPB_SYS_LOCK)^;
   SysResetRegister:=SysResetRegister or $105;
@@ -180,7 +180,7 @@ begin
  QemuHostIpAddress:='';
  DetermineEntryState;
  StartLogging;
- Sleep(i500);
+ Sleep(500);
  Log('');
  Log('program start');
  ParseCommandLine;
