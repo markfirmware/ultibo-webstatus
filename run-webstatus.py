@@ -47,7 +47,6 @@ def get_ip_address(ifname):
     )[20:24])
 
 def runqemu (kernelpath):
-    kernelpath = 'artifacts/QEMUVPB/kernel.bin'
     global buildnumber, qemu
     cmdline = 'qemuhostip={} username={} project={} branch={} buildnumber={}'.format (get_ip_address ('eth0'), username, project, branch, buildnumber)
     qemu = subprocess.Popen (["qemu-system-arm",
