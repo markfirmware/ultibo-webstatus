@@ -180,6 +180,7 @@ begin
  QemuHostIpAddress:='';
  DetermineEntryState;
  StartLogging;
+ Log('program start');
  Sleep(1000);
  Log('');
  ParseCommandLine;
@@ -190,7 +191,6 @@ begin
    EffectiveIpAddress:=QemuHostIpAddress;
    Log('');
    Log(Format('Effective IP Address (running under QEMU) is %s',[EffectiveIpAddress]));
-   Log('');
   end
  else
   begin

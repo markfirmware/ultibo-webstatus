@@ -71,11 +71,33 @@ def runqemu (kernelpath):
             break
         if 'system reset requested' in line:
             print 'detected system reset request'
-            (a, b, c) = select.select ([qemu.stdout], [], [], 3.0)
-            if a == []:
+            if not waitforstart ():
                 print 'system reset seems to have failed - restarting qemu'
                 break
         time.sleep (0.01)
+
+def waitforstart ():
+    global qemu
+    linebuffer = ''
+    started = False
+    while ([], [], []) != select.select ([qemu.stdout], [], [], 3.0):
+        try:
+            data = qemu.stdout.read (1)
+        except:
+            break
+        if data == "":
+            break
+        for c in data:
+            if c == '\r':
+                pass
+            elif c == '\n':
+                print linebuffer
+                if 'program start' in linebuffer:
+                    started = True
+                    break
+            else:
+                linebuffer += c
+    return started
 
 def main ():
     global kernelpath, qemu
