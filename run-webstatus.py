@@ -47,7 +47,8 @@ def get_ip_address(ifname):
     )[20:24])
 
 def runqemu (kernelpath):
-    global buildnumber
+    kernelpath = 'artifacts/QEMUVPB/kernel.bin'
+    global buildnumber, qemu
     cmdline = 'qemuhostip={} username={} project={} branch={} buildnumber={}'.format (get_ip_address ('eth0'), username, project, branch, buildnumber)
     qemu = subprocess.Popen (["qemu-system-arm",
                               "-M", "versatilepb",
@@ -73,23 +74,28 @@ def runqemu (kernelpath):
             (a, b, c) = select.select ([qemu.stdout], [], [], 3.0)
             if a == []:
                 print 'system reset seems to have failed - restarting qemu'
-                while True:
-                    (a, b, c) = select.select ([qemu.stderr], [], [], 3.0)
-                    if a == []:
-                        break
-                    print qemu.stderr.read (1),
-                print
-                print
-                qemu.terminate ()
+                break
         time.sleep (0.01)
 
 def main ():
-    global kernelpath
+    global kernelpath, qemu
     circle = circleclient.CircleClient ('')
     while True:
         while not getbuild (circle, username, project, branch):
             time.sleep (30)
-        runqemu (kernelpath)
+        try:
+            runqemu (kernelpath)
+        except:
+             pass
+        try:
+            qemu.terminate ()
+        except:
+            print 'exception terminating qemu'
+        try:
+            qemu.wait ()
+        except:
+            print 'exception waiting for qemu'
+        print 'qemu done'
 
 if __name__ == "__main__":
     main ()
