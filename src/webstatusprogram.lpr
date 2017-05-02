@@ -30,9 +30,9 @@ var
 procedure DetermineEntryState;
 begin
  Controller:={$ifdef CONTROLLER_RPI_INCLUDING_RPI0}  Rpi     {$endif}
-         {$ifdef CONTROLLER_RPI2_INCLUDING_RPI3} Rpi2    {$endif}
-         {$ifdef CONTROLLER_RPI3}                Rpi3    {$endif}
-         {$ifdef CONTROLLER_QEMUVPB}             QemuVpb {$endif};
+             {$ifdef CONTROLLER_RPI2_INCLUDING_RPI3} Rpi2    {$endif}
+             {$ifdef CONTROLLER_RPI3}                Rpi3    {$endif}
+             {$ifdef CONTROLLER_QEMUVPB}             QemuVpb {$endif};
 end;
 
 procedure Log(S:String);
@@ -184,8 +184,9 @@ begin
  Sleep(1000);
  Log('');
  ParseCommandLine;
- Log(Format('BoardType %s',[BoardTypeToString(BoardGetType)]));
  Log(Format('Ultibo Release %s %s %s',[ULTIBO_RELEASE_DATE,ULTIBO_RELEASE_NAME,ULTIBO_RELEASE_VERSION]));
+ Log(Format('BoardType %s',[BoardTypeToString(BoardGetType)]));
+ Log(ControllerToString(Controller));
  if Controller = QemuVpb then
   begin
    EffectiveIpAddress:=QemuHostIpAddress;
