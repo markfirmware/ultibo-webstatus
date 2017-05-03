@@ -3,10 +3,12 @@
 import fcntl, json, os, requests, select, shutil, socket, struct, subprocess, sys, time
 from circleclient import circleclient
 
+port = sys.argv [1]
+
 username = 'markfirmware'
 project = 'ultibo-webstatus'
 branch = 'test-20170425'
-ports = ['5080:80']
+ports = 'hostfwd=tcp::' + port + '-:80'
 
 def getbuild (circle, username, project, branch):
     global artifacts, kernelpath, buildnumber
@@ -58,7 +60,7 @@ def runqemu (kernelpath):
                               "-serial", "stdio",
                               "-usb",
                               "-net", "nic",
-                              "-net", "user,hostfwd=tcp::5080-:80",
+                              "-net", "user," + ports,
                               "-vnc", ":70,websocket"],
                              stdin=subprocess.PIPE,
                              stdout=subprocess.PIPE,
