@@ -8,7 +8,7 @@ portdigit = sys.argv [1]
 username = 'markfirmware'
 project = 'ultibo-webstatus'
 branch = 'test-20170425'
-ports = 'hostfwd=tcp::8' + portdigit + '-:8' + portdigit
+ports = 'hostfwd=tcp::8' + portdigit + '-:80'
 
 def getbuild (circle, username, project, branch):
     global artifacts, kernelpath, buildnumber
@@ -50,7 +50,7 @@ def get_ip_address(ifname):
 
 def runqemu (kernelpath):
     global buildnumber, qemu
-    cmdline = 'qemuhostip={} username={} project={} branch={} buildnumber={}'.format (get_ip_address ('eth0'), username, project, branch, buildnumber)
+    cmdline = 'qemuhostip={} qemuhostportdigit={} username={} project={} branch={} buildnumber={}'.format (get_ip_address ('eth0'), portdigit, username, project, branch, buildnumber)
     qemu = subprocess.Popen (["qemu-system-arm",
                               "-M", "versatilepb",
                               "-cpu", "cortex-a8",

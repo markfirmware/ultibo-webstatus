@@ -99,6 +99,7 @@ end;
 var
  BuildNumber:Cardinal;
  QemuHostIpAddress:String;
+ QemuHostIpPortDigit:String;
 
 procedure ParseCommandLine;
 var
@@ -121,6 +122,12 @@ begin
      QemuHostIpAddress:=MidStr(Param,Start + 1,Length(Param) - Start);
      Log(Format('QEMU Host IP %s',[QemuHostIpAddress]));
     end;
+   if AnsiStartsStr('qemuhostportdigit=',Param) then
+    begin
+     Start:=PosEx('=',Param);
+     QemuHostIpAddress:=MidStr(Param,Start + 1,Length(Param) - Start);
+     Log(Format('QEMU Host IP Port Digit %s',[QemuHostIpPortDigit]));
+    end;
   end;
 end;
 
@@ -132,8 +139,8 @@ type
 function TWebAboutStatus.DoContent(AHost:THTTPHost;ARequest:THTTPServerRequest;AResponse:THTTPServerResponse):Boolean; 
 begin
  Log('TWebAboutStatus.DoContent');
- AddItem(AResponse,'QEMU vnc server',Format('host %s port 5970',[EffectiveIpAddress]));
- AddItem(AResponse,'Web Browser vncviewer',MakeLink(Format('use host %s port 5770 - note port 5770, not 5970',[EffectiveIpAddress]),'http://novnc.com/noVNC/vnc.html'));
+ AddItem(AResponse,'QEMU vnc server',Format('host %s port 597%s',[EffectiveIpAddress,QemuHostIpPortDigit]));
+ AddItem(AResponse,'Web Browser vncviewer',MakeLink(Format('use host %s port 577%s - note port 577%s, not 597%s',[EffectiveIpAddress,QemuHostIpPortDigit,QemuHostIpPortDigit,QemuHostIpPortDigit]),'http://novnc.com/noVNC/vnc.html'));
  AddItem(AResponse,'CircleCI Build:',MakeLink(Format('Build #%d markfirmware/ultibo-webstatus (branch test-20170425)',[BuildNumber]),Format('https://circleci.com/gh/markfirmware/ultibo-webstatus/%d#artifacts/containers/0',[BuildNumber])));
  AddItem(AResponse,'GitHub Source:',MakeLink('markfirmware/ultibo-webstatus (branch test-20170425)','https://github.com/markfirmware/ultibo-webstatus/tree/test-20170425'));
  Result:=True;
@@ -191,7 +198,7 @@ begin
   begin
    EffectiveIpAddress:=QemuHostIpAddress;
    Log('');
-   Log(Format('Effective IP Address (running under QEMU) is %s',[EffectiveIpAddress]));
+   Log(Format('Web Server Effective URL (running under QEMU) is http://%s:8%s',[EffectiveIpAddress,QemuHostIpPortDigit]));
   end
  else
   begin
