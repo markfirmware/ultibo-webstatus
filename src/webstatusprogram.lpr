@@ -125,7 +125,7 @@ begin
    if AnsiStartsStr('qemuhostportdigit=',Param) then
     begin
      Start:=PosEx('=',Param);
-     QemuHostIpAddress:=MidStr(Param,Start + 1,Length(Param) - Start);
+     QemuHostIpPortDigit:=MidStr(Param,Start + 1,Length(Param) - Start);
      Log(Format('QEMU Host IP Port Digit %s',[QemuHostIpPortDigit]));
     end;
   end;
