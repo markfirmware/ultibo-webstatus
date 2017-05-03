@@ -3,12 +3,12 @@
 import fcntl, json, os, requests, select, shutil, socket, struct, subprocess, sys, time
 from circleclient import circleclient
 
-port = sys.argv [1]
+portdigit = sys.argv [1]
 
 username = 'markfirmware'
 project = 'ultibo-webstatus'
 branch = 'test-20170425'
-ports = 'hostfwd=tcp::' + port + '-:80'
+ports = 'hostfwd=tcp::8' + portdigit + '-:8' + portdigit
 
 def getbuild (circle, username, project, branch):
     global artifacts, kernelpath, buildnumber
@@ -20,7 +20,7 @@ def getbuild (circle, username, project, branch):
         return False
     artifacts = circle.build.artifacts (username, project, buildnumber)
     artifacts = sorted (artifacts, key = lambda a: a ['pretty_path'])
-    e = os.path.join ('artifacts', 'build-' + str (buildnumber))
+    e = os.path.join ('instance-' + portdigit, 'artifacts', 'build-' + str (buildnumber))
     if os.path.exists (e):
         shutil.rmtree (e)
     for a in artifacts:
@@ -61,7 +61,7 @@ def runqemu (kernelpath):
                               "-usb",
                               "-net", "nic",
                               "-net", "user," + ports,
-                              "-vnc", ":70,websocket"],
+                              "-vnc", ":7" + portdigit + ",websocket"],
                              stdin=subprocess.PIPE,
                              stdout=subprocess.PIPE,
                              stderr=subprocess.PIPE)
