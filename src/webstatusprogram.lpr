@@ -187,6 +187,7 @@ type
   procedure Flush;
   procedure Reset;
   function RateInHz:Double;
+  function GetCount:Cardinal;
  end;
 
 var
@@ -196,6 +197,11 @@ var
 constructor TRateMeter.Create;
 begin
  Reset;
+end;
+
+function TRateMeter.GetCount:Cardinal;
+begin
+ Result:=Count;
 end;
 
 procedure TRateMeter.Reset;
@@ -297,7 +303,7 @@ begin
     X:=WhereX;
     Y:=WhereY;
     GotoXY(40,1);
-    Write(Format('Frame Rate %5.1f Hz Mouse rate %5.1f Hz x %d y %d      ',[FrameMeter.RateInHz,MouseMeter.RateInHz,MouseOffsetX,MouseOffsetY]));
+    Write(Format('Frame Count %3d Rate %5.1f Hz Mouse rate %5.1f Hz x %d y %d      ',[FrameMeter.GetCount,FrameMeter.RateInHz,MouseMeter.RateInHz,MouseOffsetX,MouseOffsetY]));
     GotoXY(X,Y);
    end;
 end;
