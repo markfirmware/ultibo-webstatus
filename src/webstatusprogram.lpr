@@ -276,7 +276,6 @@ begin
  StartHttpServer;
  Log('');
  Log('r key will reset system');
- Log('Note that if connected through vnc, the mouse must be moved to push the key through');
  Log('Ready and waiting for input ...');
  Log ('');
  if InService then
@@ -304,7 +303,7 @@ begin
        end
       else
        begin
-        MouseMeter.Flush;
+//        MouseMeter.Flush;
         break;
        end;
      end;
