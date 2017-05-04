@@ -196,6 +196,8 @@ begin
 end;
 
 procedure TRateMeter.Increment;
+var
+ Prev:Int64;
 begin
  if not Active then
   begin
@@ -206,8 +208,15 @@ begin
   end
  else
   begin
-   Inc(Count);
+   Prev:=LastClock;
    LastClock:=ClockGetTotal;
+   if LastClock - Prev < 1000 * 1000 div 10 then
+    Inc(Count)
+   else
+    begin
+     Count:=1;
+     FirstClock:=LastClock;
+    end;
   end;
 end;
 
