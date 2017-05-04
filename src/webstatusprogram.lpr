@@ -176,6 +176,49 @@ begin
  {$endif} 
 end;
 
+type
+ TRateMeter = class
+  Active:Boolean;
+  Count:Cardinal;
+  FirstClock:LongWord;
+  LastClock:LongWord;
+  constructor Create;
+  procedure Increment;
+  function RateInKhz:Double;
+ end;
+
+var
+ MouseMeter:TRateMeter;
+
+constructor TRateMeter.Create;
+begin
+ Active:=False;
+end;
+
+procedure TRateMeter.Increment;
+begin
+ if not Active then
+  begin
+   Count:=1;
+   Active:=True;
+   FirstClock:=ClockGetCount;
+   LastClock:=FirstClock;
+  end
+ else
+  begin
+   Inc(Count);
+   LastClock:=ClockGetCount;
+  end;
+end;
+
+function TRateMeter.RateInKhz:Double;
+begin
+ if Active then
+  Result:=1000 * (LastClock - FirstClock / Count)
+ else
+  Result:=0;
+end;
+
 procedure Main;
 var
  MouseData:TMouseData;
@@ -184,6 +227,7 @@ var
  Key:Char;
 begin
  BuildNumber:=0;
+ MouseMeter:=TRateMeter.Create;
  QemuHostIpAddress:='';
  DetermineEntryState;
  StartLogging;
@@ -225,10 +269,11 @@ begin
      end;
     if MouseRead(@MouseData,SizeOf(TMouseData),MouseCount) = ERROR_SUCCESS then
      begin
+      MouseMeter.Increment;
       X:=WhereX;
       Y:=WhereY;
       GotoXY(80,1);
-      Write(Format('%d %d      ',[MouseData.OffsetX,MouseData.OffsetY]));
+      Write(Format('Mouse rate %5.1f kHz x %d y %d      ',[MouseMeter.RateInKhz,MouseData.OffsetX,MouseData.OffsetY]));
       GotoXY(X,Y);
      end;
    end;
