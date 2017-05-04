@@ -184,7 +184,7 @@ type
   LastClock:Int64;
   constructor Create;
   procedure Increment;
-  procedure Flush;
+  procedure FlushInSeconds(Time:Double);
   procedure Reset;
   function RateInHz:Double;
   function GetCount:Cardinal;
@@ -209,9 +209,9 @@ begin
  Active:=False;
 end;
 
-procedure TRateMeter.Flush;
+procedure TRateMeter.FlushInSeconds(Time:Double);
 begin
- if ClockGetTotal - LastClock < 1000 * 1000 div 10 then
+ if ClockGetTotal - LastClock < 1000 * 1000 * Time then
   Active:=False;
 end;
 
@@ -303,7 +303,7 @@ begin
        end
       else
        begin
-//        MouseMeter.Flush;
+        MouseMeter.FlushInSeconds(0.3);
         break;
        end;
      end;
