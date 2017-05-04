@@ -184,7 +184,7 @@ type
   LastClock:Int64;
   constructor Create;
   procedure Increment;
-  function RateInKhz:Double;
+  function RateInHz:Double;
  end;
 
 var
@@ -211,10 +211,10 @@ begin
   end;
 end;
 
-function TRateMeter.RateInKhz:Double;
+function TRateMeter.RateInHz:Double;
 begin
  if Active then
-  Result:=1000 * Count / (LastClock - FirstClock)
+  Result:=Count / (LastClock - FirstClock)
  else
   Result:=0;
 end;
@@ -273,7 +273,7 @@ begin
       X:=WhereX;
       Y:=WhereY;
       GotoXY(60,1);
-      Write(Format('Mouse rate %5.1f kHz x %d y %d      ',[MouseMeter.RateInKhz,MouseData.OffsetX,MouseData.OffsetY]));
+      Write(Format('Mouse rate %5.1f Hz x %d y %d      ',[MouseMeter.RateInHz,MouseData.OffsetX,MouseData.OffsetY]));
       GotoXY(X,Y);
      end;
    end;
