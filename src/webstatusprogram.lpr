@@ -184,10 +184,12 @@ type
   LastClock:Int64;
   constructor Create;
   procedure Increment;
+  procedure Flush;
   function RateInHz:Double;
  end;
 
 var
+ FrameMeter:TRateMeter;
  MouseMeter:TRateMeter;
 
 constructor TRateMeter.Create;
@@ -195,10 +197,15 @@ begin
  Active:=False;
 end;
 
-procedure TRateMeter.Increment;
-var
- Prev:Int64;
+procedure TRateMeter.Flush;
 begin
+ if ClockGetTotal - LastClock < 1000 * 1000 div 10 then
+  Active:=False;
+end;
+
+procedure TRateMeter.Increment;
+begin
+ Flush;
  if not Active then
   begin
    Count:=1;
@@ -208,15 +215,8 @@ begin
   end
  else
   begin
-   Prev:=LastClock;
+   Inc(Count);
    LastClock:=ClockGetTotal;
-   if LastClock - Prev < 1000 * 1000 div 10 then
-    Inc(Count)
-   else
-    begin
-     Count:=1;
-     FirstClock:=LastClock;
-    end;
   end;
 end;
 
@@ -232,11 +232,15 @@ procedure Main;
 var
  MouseData:TMouseData;
  MouseCount:Cardinal;
+ MouseOffsetX,MouseOffsetY:Integer;
  X,Y:Cardinal;
  Key:Char;
 begin
  BuildNumber:=0;
+ FrameMeter:=TRateMeter.Create;
  MouseMeter:=TRateMeter.Create;
+ MouseOffsetX:=0;
+ MouseOffsetY:=0;
  QemuHostIpAddress:='';
  DetermineEntryState;
  StartLogging;
@@ -267,6 +271,7 @@ begin
  if InService then
   while True do
    begin
+    FrameMeter.Increment;
     if KeyPressed then
      begin
       Key:=ReadKey;
@@ -279,12 +284,16 @@ begin
     if MouseRead(@MouseData,SizeOf(TMouseData),MouseCount) = ERROR_SUCCESS then
      begin
       MouseMeter.Increment;
-      X:=WhereX;
-      Y:=WhereY;
-      GotoXY(60,1);
-      Write(Format('Mouse rate %5.1f Hz x %d y %d      ',[MouseMeter.RateInHz,MouseData.OffsetX,MouseData.OffsetY]));
-      GotoXY(X,Y);
-     end;
+      MouseOffsetX:=MouseData.OffsetX;
+      MouseOffsetY:=MouseData.OffsetY;
+     end
+    else
+     MouseMeter.Flush;
+    X:=WhereX;
+    Y:=WhereY;
+    GotoXY(40,1);
+    Write(Format('Frame Rate %5.1 Hz Mouse rate %5.1f Hz x %d y %d      ',[FrameMeter.RateInHz,MouseMeter.RateInHz,MouseOffsetX,MouseOffsetY]));
+    GotoXY(X,Y);
    end;
 end;
 
