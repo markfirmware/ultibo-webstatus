@@ -292,7 +292,7 @@ begin
     X:=WhereX;
     Y:=WhereY;
     GotoXY(40,1);
-    Write(Format('Frame Rate %5.1 Hz Mouse rate %5.1f Hz x %d y %d      ',[FrameMeter.RateInHz,MouseMeter.RateInHz,MouseOffsetX,MouseOffsetY]));
+    Write(Format('Frame Rate %5.1f Hz Mouse rate %5.1f Hz x %d y %d      ',[FrameMeter.RateInHz,MouseMeter.RateInHz,MouseOffsetX,MouseOffsetY]));
     GotoXY(X,Y);
    end;
 end;
