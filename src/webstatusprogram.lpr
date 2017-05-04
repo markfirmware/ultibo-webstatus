@@ -234,9 +234,16 @@ begin
 end;
 
 function TRateMeter.RateInHz:Double;
+var
+ Rate:Double;
 begin
  if Active and (Count >= 3) and (LastClock <> FirstClock) then
-  Result:=1000 * 1000 * Count / (LastClock - FirstClock)
+  begin
+   Rate:=LastClock;
+   Rate:=Rate - FirstClock;
+   Rate:=Count / Rate;
+   Result:=1000.0 * 1000.0 * Rate;
+  end
  else
   Result:=0;
 end;
