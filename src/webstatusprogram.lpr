@@ -214,7 +214,7 @@ end;
 function TRateMeter.RateInHz:Double;
 begin
  if Active then
-  Result:=Count / (LastClock - FirstClock)
+  Result:=1000 * 1000 * Count / (LastClock - FirstClock)
  else
   Result:=0;
 end;
