@@ -180,8 +180,8 @@ type
  TRateMeter = class
   Active:Boolean;
   Count:Cardinal;
-  FirstClock:LongWord;
-  LastClock:LongWord;
+  FirstClock:Int64;
+  LastClock:Int64;
   constructor Create;
   procedure Increment;
   function RateInKhz:Double;
@@ -201,13 +201,13 @@ begin
   begin
    Count:=1;
    Active:=True;
-   FirstClock:=ClockGetCount;
+   FirstClock:=ClockGetTotal;
    LastClock:=FirstClock;
   end
  else
   begin
    Inc(Count);
-   LastClock:=ClockGetCount;
+   LastClock:=ClockGetTotal;
   end;
 end;
 
@@ -272,7 +272,7 @@ begin
       MouseMeter.Increment;
       X:=WhereX;
       Y:=WhereY;
-      GotoXY(80,1);
+      GotoXY(60,1);
       Write(Format('Mouse rate %5.1f kHz x %d y %d      ',[MouseMeter.RateInKhz,MouseData.OffsetX,MouseData.OffsetY]));
       GotoXY(X,Y);
      end;
