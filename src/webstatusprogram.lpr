@@ -292,14 +292,16 @@ begin
         SystemReset;
        end;
      end;
-    if MouseRead(@MouseData,SizeOf(TMouseData),MouseCount) = ERROR_SUCCESS then
+    MouseCount:=0;
+    MouseReadEx(@MouseData,SizeOf(TMouseData),MOUSE_FLAG_NON_BLOCK,MouseCount);
+    if MouseCount > 0 then
      begin
       MouseMeter.Increment;
       MouseOffsetX:=MouseData.OffsetX;
       MouseOffsetY:=MouseData.OffsetY;
      end
     else
-     MouseMeter.Reset;
+     MouseMeter.Flush;
     X:=WhereX;
     Y:=WhereY;
     GotoXY(40,1);
