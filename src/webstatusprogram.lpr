@@ -168,7 +168,7 @@ begin
   Log('');
   Log('system reset requested');
   GotoXY(40,1);
-  Write('System reset requested                           ');
+  Write('System reset requested                                     ');
   Sleep(1 * 1000);
   PLongWord(VERSATILEPB_SYS_LOCK)^:=$a05f;
   SysResetRegister:=PLongWord(VERSATILEPB_SYS_LOCK)^;
