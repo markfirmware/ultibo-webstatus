@@ -185,6 +185,7 @@ type
   constructor Create;
   procedure Increment;
   procedure Flush;
+  procedure Reset;
   function RateInHz:Double;
  end;
 
@@ -193,6 +194,11 @@ var
  MouseMeter:TRateMeter;
 
 constructor TRateMeter.Create;
+begin
+ Reset;
+end;
+
+procedure TRateMeter.Reset;
 begin
  Active:=False;
 end;
@@ -205,7 +211,6 @@ end;
 
 procedure TRateMeter.Increment;
 begin
- Flush;
  if not Active then
   begin
    Count:=1;
@@ -288,7 +293,7 @@ begin
       MouseOffsetY:=MouseData.OffsetY;
      end
     else
-     MouseMeter.Flush;
+     MouseMeter.Reset;
     X:=WhereX;
     Y:=WhereY;
     GotoXY(40,1);
