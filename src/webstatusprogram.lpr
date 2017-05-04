@@ -318,7 +318,7 @@ begin
     X:=WhereX;
     Y:=WhereY;
     GotoXY(20,1);
-    Write(Format('Clock Total %f Frame Count %3d Rate %5.1f Hz Mouse rate %5.1f Hz x %d y %d      ',[ClockGetTotal * 1.0,FrameMeter.GetCount,FrameMeter.RateInHz,MouseMeter.RateInHz,MouseOffsetX,MouseOffsetY]));
+    Write(Format('Frame Count %3d Rate %5.1f Hz Mouse rate %5.1f Hz x %d y %d      ',[FrameMeter.GetCount,FrameMeter.RateInHz,MouseMeter.RateInHz,MouseOffsetX,MouseOffsetY]));
     GotoXY(X,Y);
    end;
 end;
