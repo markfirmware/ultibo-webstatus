@@ -168,7 +168,7 @@ begin
   Log('');
   Log('system reset requested');
   GotoXY(20,1);
-  Write('System reset requested - will take no more than 3 seconds                      ');
+  Write('System reset requested - will take no more than 3 seconds                                ');
   Sleep(1 * 1000);
   PLongWord(VERSATILEPB_SYS_LOCK)^:=$a05f;
   SysResetRegister:=PLongWord(VERSATILEPB_SYS_LOCK)^;
@@ -235,14 +235,13 @@ end;
 
 function TRateMeter.RateInHz:Double;
 var
- Rate:Double;
+ Delta:Double;
 begin
  if Active and (Count >= 3) and (LastClock <> FirstClock) then
   begin
-   Rate:=LastClock;
-   Rate:=Rate - FirstClock;
-   Rate:=Count / Rate;
-   Result:=1000.0 * 1000.0 * Rate;
+   Delta:=LastClock;
+   Delta:=Delta - FirstClock;
+   Result:=1000.0 * 1000.0 * Count / Delta;
   end
  else
   Result:=0;
