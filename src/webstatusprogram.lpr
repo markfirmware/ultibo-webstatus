@@ -167,6 +167,8 @@ begin
  {$ifdef CONTROLLER_QEMUVPB}
   Log('');
   Log('system reset requested');
+  GotoXY(40,1);
+  Write('System reset requested                 ');
   Sleep(1 * 1000);
   PLongWord(VERSATILEPB_SYS_LOCK)^:=$a05f;
   SysResetRegister:=PLongWord(VERSATILEPB_SYS_LOCK)^;
@@ -211,7 +213,7 @@ end;
 
 procedure TRateMeter.FlushInSeconds(Time:Double);
 begin
- if ClockGetTotal - LastClock < 1000 * 1000 * Time then
+ if ClockGetTotal - LastClock >= 1000 * 1000 * Time then
   Active:=False;
 end;
 
