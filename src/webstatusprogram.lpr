@@ -180,9 +180,7 @@ end;
 
 type
  TRateMeter = class
-  Active:Boolean;
-  Discard:Integer;
-  DiscardSetting:Integer;
+  PrecountSetting:Integer;
   Count:Cardinal;
   FirstClock:Int64;
   LastClock:Int64;
@@ -190,7 +188,7 @@ type
   procedure Increment;
   procedure FlushInSeconds(Time:Double);
   procedure Reset;
-  procedure SetDiscard(Setting:Integer);
+  procedure SetPrecount(Setting:Integer);
   function RateInHz:Double;
   function GetCount:Cardinal;
  end;
@@ -201,13 +199,13 @@ var
 
 constructor TRateMeter.Create;
 begin
- DiscardSetting:=0;
+ PrecountSetting:=0;
  Reset;
 end;
 
-procedure TRateMeter.SetDiscard(Setting:Integer);
+procedure TRateMeter.SetPrecount(Setting:Integer);
 begin
- DiscardSetting:=Setting;
+ PrecountSetting:=Setting;
 end;
 
 function TRateMeter.GetCount:Cardinal;
@@ -217,49 +215,34 @@ end;
 
 procedure TRateMeter.Reset;
 begin
- Active:=False;
+ Count:=-PrecountSetting;
+ FirstClock:=ClockGetTotal;
+ LastClock:=FirstClock;
 end;
 
 procedure TRateMeter.FlushInSeconds(Time:Double);
 begin
  if ClockGetTotal - LastClock >= 1000 * 1000 * Time then
-  Active:=False;
+  Reset;
 end;
 
 procedure TRateMeter.Increment;
 begin
- if not Active then
-  begin
-   Active:=True;
-   Discard:=DiscardSetting;
-  end
- else if Discard > 0 then
-  begin
-   Dec(Discard)
-  end
- else if Discard = 0 then
-  begin
-   Discard:=-1;
-   Count:=1;
-   FirstClock:=ClockGetTotal;
-   LastClock:=FirstClock;
-  end
- else
-  begin
-   Inc(Count);
-   LastClock:=ClockGetTotal;
-  end;
+ Inc(Count);
+ LastClock:=ClockGetTotal;
+ if Count <= 1 then
+  FirstClock:=LastClock;
 end;
 
 function TRateMeter.RateInHz:Double;
 var
  Delta:Double;
 begin
- if Active and (Count >= 3) and (LastClock <> FirstClock) then
+ Delta:=LastClock;
+ Delta:=Delta - FirstClock;
+ if (Count >= 2) and (Delta <> 0) then
   begin
-   Delta:=LastClock;
-   Delta:=Delta - FirstClock;
-   Result:=1000.0 * 1000.0 * Count / Delta;
+   Result:=1000.0 * 1000.0 * (Count - 1) / Delta;
   end
  else
   Result:=0;
@@ -276,7 +259,7 @@ begin
  BuildNumber:=0;
  FrameMeter:=TRateMeter.Create;
  MouseMeter:=TRateMeter.Create;
- MouseMeter.SetDiscard(1);
+ MouseMeter.SetPrecount(1);
  MouseOffsetX:=0;
  MouseOffsetY:=0;
  QemuHostIpAddress:='';
