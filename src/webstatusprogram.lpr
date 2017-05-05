@@ -203,27 +203,11 @@ begin
  Reset;
 end;
 
-procedure TRateMeter.SetPrecount(Setting:Integer);
-begin
- PrecountSetting:=Setting;
-end;
-
-function TRateMeter.GetCount:Cardinal;
-begin
- Result:=Count;
-end;
-
 procedure TRateMeter.Reset;
 begin
  Count:=-PrecountSetting;
  FirstClock:=ClockGetTotal;
  LastClock:=FirstClock;
-end;
-
-procedure TRateMeter.FlushInSeconds(Time:Double);
-begin
- if ClockGetTotal - LastClock >= 1000 * 1000 * Time then
-  Reset;
 end;
 
 procedure TRateMeter.Increment;
@@ -236,16 +220,38 @@ end;
 
 function TRateMeter.RateInHz:Double;
 var
+
+procedure TRateMeter.FlushInSeconds(Time:Double);
+begin
+ if ClockGetTotal - LastClock >= 1000 * 1000 * Time then
+  Reset;
+end;
  Delta:Double;
 begin
  Delta:=LastClock;
  Delta:=Delta - FirstClock;
- if (Count >= 2) and (Delta <> 0) then
+ if Delta <> 0 then
   begin
-   Result:=1000.0 * 1000.0 * (Count - 1) / Delta;
+   Result:=1000.0 * 1000.0 * Count / Delta;
   end
  else
   Result:=0;
+end;
+
+procedure TRateMeter.FlushInSeconds(Time:Double);
+begin
+ if ClockGetTotal - LastClock >= 1000 * 1000 * Time then
+  Reset;
+end;
+
+procedure TRateMeter.SetPrecount(Setting:Integer);
+begin
+ PrecountSetting:=Setting;
+end;
+
+function TRateMeter.GetCount:Cardinal;
+begin
+ Result:=Count;
 end;
 
 procedure Main;

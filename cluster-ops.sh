@@ -5,14 +5,15 @@ function stopall {
 }
 
 case $1 in
-start)
+stop)
+    stopall qemu-system-arm
+    ;;
+restart)
+    stopall qemu-system-arm
     for i in 0 1 2 3 4 5
     do
         ./run-webstatus.py $i | tee log-$i.txt &
     done
-    ;;
-stop)
-    stopall qemu-system-arm
     ;;
 esac
 
