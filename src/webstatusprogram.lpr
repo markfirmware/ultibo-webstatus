@@ -259,7 +259,7 @@ begin
  BuildNumber:=0;
  FrameMeter:=TRateMeter.Create;
  MouseMeter:=TRateMeter.Create;
- MouseMeter.SetPrecount(1);
+ MouseMeter.SetPrecount(3);
  MouseOffsetX:=0;
  MouseOffsetY:=0;
  QemuHostIpAddress:='';
