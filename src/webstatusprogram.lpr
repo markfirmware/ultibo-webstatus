@@ -220,12 +220,6 @@ end;
 
 function TRateMeter.RateInHz:Double;
 var
-
-procedure TRateMeter.FlushInSeconds(Time:Double);
-begin
- if ClockGetTotal - LastClock >= 1000 * 1000 * Time then
-  Reset;
-end;
  Delta:Double;
 begin
  Delta:=LastClock;
