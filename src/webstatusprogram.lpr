@@ -276,7 +276,7 @@ begin
  BuildNumber:=0;
  FrameMeter:=TRateMeter.Create;
  MouseMeter:=TRateMeter.Create;
- MouseMeter.SetDiscard(4);
+ MouseMeter.SetDiscard(3);
  MouseOffsetX:=0;
  MouseOffsetY:=0;
  QemuHostIpAddress:='';
@@ -285,7 +285,6 @@ begin
  Sleep(500);
  Log('');
  Log('program start');
- Log('test kernel selection');
  ParseCommandLine;
  Log(Format('Ultibo Release %s %s %s',[ULTIBO_RELEASE_DATE,ULTIBO_RELEASE_NAME,ULTIBO_RELEASE_VERSION]));
  Log(Format('BoardType %s',[BoardTypeToString(BoardGetType)]));
