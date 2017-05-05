@@ -181,6 +181,8 @@ end;
 type
  TRateMeter = class
   Active:Boolean;
+  Discard:Integer;
+  DiscardSetting:Integer;
   Count:Cardinal;
   FirstClock:Int64;
   LastClock:Int64;
@@ -188,6 +190,7 @@ type
   procedure Increment;
   procedure FlushInSeconds(Time:Double);
   procedure Reset;
+  procedure SetDiscard(Setting:Integer);
   function RateInHz:Double;
   function GetCount:Cardinal;
  end;
@@ -198,7 +201,13 @@ var
 
 constructor TRateMeter.Create;
 begin
+ DiscardSetting:=0;
  Reset;
+end;
+
+procedure TRateMeter.SetDiscard(Setting:Integer);
+begin
+ DiscardSetting:=Setting;
 end;
 
 function TRateMeter.GetCount:Cardinal;
@@ -221,8 +230,17 @@ procedure TRateMeter.Increment;
 begin
  if not Active then
   begin
-   Count:=1;
    Active:=True;
+   Discard:=DiscardSetting;
+  end
+ else if Discard > 0 then
+  begin
+   Dec(Discard)
+  end
+ else if Discard = 0 then
+  begin
+   Discard:=-1;
+   Count:=1;
    FirstClock:=ClockGetTotal;
    LastClock:=FirstClock;
   end
@@ -258,6 +276,7 @@ begin
  BuildNumber:=0;
  FrameMeter:=TRateMeter.Create;
  MouseMeter:=TRateMeter.Create;
+ MouseMeter.SetDiscard(4);
  MouseOffsetX:=0;
  MouseOffsetY:=0;
  QemuHostIpAddress:='';
@@ -319,7 +338,8 @@ begin
     X:=WhereX;
     Y:=WhereY;
     GotoXY(20,1);
-    Write(Format('Frame Count %3d Rate %5.1f Hz Mouse rate %5.1f Hz x %d y %d      ',[FrameMeter.GetCount,FrameMeter.RateInHz,MouseMeter.RateInHz,MouseOffsetX,MouseOffsetY]));
+    Write(Format('Frame Count %3d Rate %5.1f Hz Mouse rate %5.1f Hz dx %d dy %d',[FrameMeter.GetCount,FrameMeter.RateInHz,MouseMeter.RateInHz,MouseOffsetX,MouseOffsetY]));
+    ClrEol;
     GotoXY(X,Y);
    end;
 end;

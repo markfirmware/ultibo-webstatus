@@ -56,7 +56,7 @@ def runqemu (kernelpath):
                               "-cpu", "cortex-a8",
                               "-kernel", kernelpath,
                               "-append", cmdline,
-                              "-m", "256M",
+                              "-m", "96M",
                               "-serial", "stdio",
                               "-usb",
                               "-net", "nic",
