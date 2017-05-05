@@ -6,7 +6,7 @@ function stopall {
 
 case $1 in
 start)
-    for i in 0 1 2 3 4 5 6 8 9
+    for i in 0 1 2 3 4 5
     do
         ./run-webstatus.py $i | tee log-$i.txt &
     done
