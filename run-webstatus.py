@@ -49,8 +49,8 @@ def get_ip_address(ifname):
     )[20:24])
 
 def runqemu (kernelpath):
-    global buildnumber, qemu
-    cmdline = 'qemuhostip={} qemuhostportdigit={} username={} project={} branch={} buildnumber={}'.format (get_ip_address ('eth0'), portdigit, username, project, branch, buildnumber)
+    global buildnumber, qemu, qemuhostlocation
+    cmdline = 'qemuhostlocation={} qemuhostip={} qemuhostportdigit={} username={} project={} branch={} buildnumber={}'.format (qemuhostlocation, get_ip_address ('eth0'), portdigit, username, project, branch, buildnumber)
     qemu = subprocess.Popen (["qemu-system-arm",
                               "-M", "versatilepb",
                               "-cpu", "cortex-a8",
@@ -102,7 +102,12 @@ def waitforstart ():
     return started
 
 def main ():
-    global kernelpath, qemu
+    global kernelpath, qemu, qemuhostlocation
+    qemuhostlocation=''
+    try:
+        qemuhostlocation = os.environ ['HOSTLOCATION']
+    except:
+        pass
     circle = circleclient.CircleClient ('')
     while True:
         while not getbuild (circle, username, project, branch):
