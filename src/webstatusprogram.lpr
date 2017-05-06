@@ -186,7 +186,6 @@ end;
 
 type
  TRateMeter = class
-  PrecountSetting:Integer;
   Count:Cardinal;
   FirstClock:Int64;
   LastClock:Int64;
@@ -194,7 +193,6 @@ type
   procedure Increment;
   procedure FlushInSeconds(Time:Double);
   procedure Reset;
-  procedure SetPrecount(Setting:Integer);
   function RateInHz:Double;
   function GetCount:Cardinal;
  end;
@@ -205,13 +203,12 @@ var
 
 constructor TRateMeter.Create;
 begin
- PrecountSetting:=0;
  Reset;
 end;
 
 procedure TRateMeter.Reset;
 begin
- Count:=-PrecountSetting;
+ Count:=0;
  FirstClock:=ClockGetTotal;
  LastClock:=FirstClock;
 end;
@@ -220,8 +217,6 @@ procedure TRateMeter.Increment;
 begin
  Inc(Count);
  LastClock:=ClockGetTotal;
- if Count <= 1 then
-  FirstClock:=LastClock;
 end;
 
 function TRateMeter.RateInHz:Double;
@@ -230,7 +225,7 @@ var
 begin
  Delta:=LastClock;
  Delta:=Delta - FirstClock;
- if Delta <> 0 then
+ if Delta >= 500 * 1000 then
   begin
    Result:=1000.0 * 1000.0 * Count / Delta;
   end
@@ -242,11 +237,6 @@ procedure TRateMeter.FlushInSeconds(Time:Double);
 begin
  if ClockGetTotal - LastClock >= 1000 * 1000 * Time then
   Reset;
-end;
-
-procedure TRateMeter.SetPrecount(Setting:Integer);
-begin
- PrecountSetting:=Setting;
 end;
 
 function TRateMeter.GetCount:Cardinal;
@@ -261,13 +251,14 @@ var
  MouseOffsetX,MouseOffsetY:Integer;
  X,Y:Cardinal;
  Key:Char;
- Clock,Rtc:Int64;
+ Clock,InitialClock,ClockSecondsValue,InitialClockSeconds,Rtc,InitialRtc,TimeDelta:Int64;
 begin
- RTCDeviceStart(RTCDeviceGetDefault);
+ InitialRtc:=SysRtcGetTime;
+ InitialClock:=ClockGetTotal;
+ InitialClockSeconds:=ClockSeconds;
  BuildNumber:=0;
  FrameMeter:=TRateMeter.Create;
  MouseMeter:=TRateMeter.Create;
- MouseMeter.SetPrecount(5);
  MouseOffsetX:=0;
  MouseOffsetY:=0;
  QemuHostIpAddress:='';
@@ -301,8 +292,14 @@ begin
  if InService then
   while True do
    begin
-    Rtc:=RTCDeviceGetTime(RTCDeviceGetDefault);
+    Rtc:=SysRtcGetTime;
     Clock:=ClockGetTotal;
+    ClockSecondsValue:=ClockSeconds;
+    Rtc:=Rtc - InitialRtc;
+    Rtc:=Rtc div 10;
+    Clock:=Clock - InitialClock;
+    TimeDelta:=Clock;
+    TimeDelta:=TimeDelta - Rtc;
     FrameMeter.Increment;
     if KeyPressed then
      begin
@@ -335,7 +332,7 @@ begin
     Write(Format('Frame Count %3d Rate %5.1f Hz Mouse rate %5.1f Hz dx %d dy %d',[FrameMeter.GetCount,FrameMeter.RateInHz,MouseMeter.RateInHz,MouseOffsetX,MouseOffsetY]));
     ClrEol;
     GotoXY(20,2);
-    Write(Format('RTC %d Clock %d',[Rtc, Clock]));
+    Write(Format('RTC %d Clock %d Delta %8d ClockSeconds %d Error %d',[Rtc,Clock,TimeDelta,ClockSecondsValue - InitialClockSeconds, Rtc div (1000*1000) - ClockSecondsValue - InitialClockSeconds]));
     ClrEol;
     GotoXY(X,Y);
    end;
