@@ -8,7 +8,7 @@ uses
  {$ifdef CONTROLLER_QEMUVPB}             QEMUVersatilePB,PlatformQemuVpb,VersatilePB, {$endif}
 
  Classes,Crt,GlobalConfig,GlobalConst,
- HTTP,Ip,Logging,Mouse,Network,Platform,Serial,
+ HTTP,Ip,Logging,Mouse,Network,Platform,Rtc,Serial,
  StrUtils,SysUtils,Ultibo,WebStatus,Winsock2;
 
 type
@@ -150,12 +150,18 @@ var
  AboutStatus:TWebAboutStatus;
 
 procedure StartHttpServer;
+var
+ HTTPClient:THTTPClient;
+ ResponseBody:String;
 begin
  HTTPListener:=THTTPListener.Create;
  WebStatusRegister(HTTPListener,'','',True);
  AboutStatus:=TWebAboutStatus.Create('About','/about',2);
  HTTPListener.RegisterDocument('',AboutStatus);
  HTTPListener.Active:=True;
+ HTTPClient:=THTTPClient.Create;
+ if not HTTPClient.GetString('http://127.0.0.1/status/platform',ResponseBody) then
+  Log(Format('HTTPClient error %d %s',[HTTPClient.ResponseStatus,HTTPClient.ResponseReason]))
 end;
 
 procedure SystemReset;
@@ -255,7 +261,9 @@ var
  MouseOffsetX,MouseOffsetY:Integer;
  X,Y:Cardinal;
  Key:Char;
+ Clock,Rtc:Int64;
 begin
+ RTCDeviceStart(RTCDeviceGetDefault);
  BuildNumber:=0;
  FrameMeter:=TRateMeter.Create;
  MouseMeter:=TRateMeter.Create;
@@ -266,6 +274,7 @@ begin
  DetermineEntryState;
  StartLogging;
  Sleep(500);
+ Log('');
  Log('');
  Log('program start');
  ParseCommandLine;
@@ -291,6 +300,8 @@ begin
  if InService then
   while True do
    begin
+    Rtc:=RTCDeviceGetTime(RTCDeviceGetDefault);
+    Clock:=ClockGetTotal;
     FrameMeter.Increment;
     if KeyPressed then
      begin
@@ -321,6 +332,9 @@ begin
     Y:=WhereY;
     GotoXY(20,1);
     Write(Format('Frame Count %3d Rate %5.1f Hz Mouse rate %5.1f Hz dx %d dy %d',[FrameMeter.GetCount,FrameMeter.RateInHz,MouseMeter.RateInHz,MouseOffsetX,MouseOffsetY]));
+    ClrEol;
+    GotoXY(20,2);
+    Write(Format('RTC %f Clock %f',[1.0 * Rtc, 1.0 * Clock]));
     ClrEol;
     GotoXY(X,Y);
    end;
