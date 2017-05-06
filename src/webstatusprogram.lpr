@@ -160,7 +160,7 @@ begin
  HTTPListener.RegisterDocument('',AboutStatus);
  HTTPListener.Active:=True;
  HTTPClient:=THTTPClient.Create;
- if not HTTPClient.GetString('http://127.0.0.1/status/platform',ResponseBody) then
+ if not HTTPClient.GetString('http://127.0.0.1/status/about',ResponseBody) then
   Log(Format('HTTPClient error %d %s',[HTTPClient.ResponseStatus,HTTPClient.ResponseReason]))
 end;
 
@@ -273,7 +273,6 @@ begin
  Log(Format('Ultibo Release %s %s %s',[ULTIBO_RELEASE_DATE,ULTIBO_RELEASE_NAME,ULTIBO_RELEASE_VERSION]));
  if Controller = QemuVpb then
   begin
-   IpAddress:=GetIpAddress;
    EffectiveIpAddress:=QemuHostIpAddress;
    Log('');
    Log(Format('Web Server Effective URL (running under QEMU) is http://%s:8%s',[EffectiveIpAddress,QemuHostIpPortDigit]));
@@ -330,7 +329,7 @@ begin
     GotoXY(20,1);
     Write(Format('Frame Count %3d Rate %5.1f Hz Mouse rate %5.1f Hz dx %d dy %d',[FrameMeter.GetCount,FrameMeter.RateInHz,MouseMeter.RateInHz,MouseOffsetX,MouseOffsetY]));
     ClrEol;
-    GotoXY(20,2);
+    GotoXY(20,3);
     Write(Format('RTC %d Clock %d Delta %8d ClockSeconds %d Error %d',[Rtc,Clock,TimeDelta,ClockSecondsValue - InitialClockSeconds, Rtc div (1000*1000) - ClockSecondsValue - InitialClockSeconds]));
     ClrEol;
     GotoXY(X,Y);
