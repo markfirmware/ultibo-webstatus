@@ -275,6 +275,7 @@ begin
  Log(ControllerToString(Controller));
  if Controller = QemuVpb then
   begin
+   IpAddress:=GetIpAddress;
    EffectiveIpAddress:=QemuHostIpAddress;
    Log('');
    Log(Format('Web Server Effective URL (running under QEMU) is http://%s:8%s',[EffectiveIpAddress,QemuHostIpPortDigit]));
