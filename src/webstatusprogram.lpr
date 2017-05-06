@@ -276,6 +276,7 @@ begin
  Sleep(500);
  Log('');
  Log('');
+ Log('');
  Log('program start');
  ParseCommandLine;
  Log(Format('Ultibo Release %s %s %s',[ULTIBO_RELEASE_DATE,ULTIBO_RELEASE_NAME,ULTIBO_RELEASE_VERSION]));
@@ -334,7 +335,7 @@ begin
     Write(Format('Frame Count %3d Rate %5.1f Hz Mouse rate %5.1f Hz dx %d dy %d',[FrameMeter.GetCount,FrameMeter.RateInHz,MouseMeter.RateInHz,MouseOffsetX,MouseOffsetY]));
     ClrEol;
     GotoXY(20,2);
-    Write(Format('RTC %f Clock %f',[1.0 * Rtc, 1.0 * Clock]));
+    Write(Format('RTC %d Clock %d',[Rtc, Clock]));
     ClrEol;
     GotoXY(X,Y);
    end;
