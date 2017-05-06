@@ -271,8 +271,6 @@ begin
  Log('program start');
  ParseCommandLine;
  Log(Format('Ultibo Release %s %s %s',[ULTIBO_RELEASE_DATE,ULTIBO_RELEASE_NAME,ULTIBO_RELEASE_VERSION]));
- Log(Format('BoardType %s',[BoardTypeToString(BoardGetType)]));
- Log(ControllerToString(Controller));
  if Controller = QemuVpb then
   begin
    IpAddress:=GetIpAddress;
