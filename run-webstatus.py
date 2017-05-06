@@ -48,9 +48,11 @@ def get_ip_address(ifname):
         struct.pack('256s', ifname[:15])
     )[20:24])
 
+#                             "-net", "socket,mcast=230.0.0.1:1234",
+
 def runqemu (kernelpath):
     global buildnumber, qemu, qemuhostlocation
-    cmdline = 'NETWORK0_IP_CONFIG=STATIC NETWORK0_IP_ADDRESS=10.0.2.10{} NETWORK0_IP_NETMASK=255.255.255.0 NETWORK0_IP_GATEWAY=10.0.2.1 qemuhostlocation={} qemuhostip={} qemuhostportdigit={} username={} project={} branch={} buildnumber={}'.format (portdigit, qemuhostlocation, get_ip_address ('eth0'), portdigit, username, project, branch, buildnumber)
+    cmdline = 'xNETWORK0_IP_CONFIG=STATIC xNETWORK0_IP_ADDRESS=10.0.2.10{} xNETWORK0_IP_NETMASK=255.255.255.0 xNETWORK0_IP_GATEWAY=10.0.2.1 qemuhostlocation={} qemuhostip={} qemuhostportdigit={} username={} project={} branch={} buildnumber={}'.format (portdigit, qemuhostlocation, get_ip_address ('eth0'), portdigit, username, project, branch, buildnumber)
     qemu = subprocess.Popen (["qemu-system-arm",
                               "-M", "versatilepb",
                               "-cpu", "cortex-a8",
@@ -60,7 +62,6 @@ def runqemu (kernelpath):
                               "-serial", "stdio",
                               "-usb",
                               "-net", "nic,macaddr=52:54:00:12:34:5" + portdigit,
-                              "-net", "socket,mcast=230.0.0.1:1234",
                               "-net", "user," + ports,
                               "-vnc", ":7" + portdigit + ",websocket"],
                              stdin=subprocess.PIPE,
