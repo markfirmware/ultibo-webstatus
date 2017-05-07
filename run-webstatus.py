@@ -78,6 +78,9 @@ def runqemu (kernelpath):
             if not waitforstart ():
                 print 'system reset seems to have failed - restarting qemu'
                 break
+        if 'power reset requested' in line:
+            print 'detected power reset request'
+            break
         time.sleep (0.01)
 
 def waitforstart ():

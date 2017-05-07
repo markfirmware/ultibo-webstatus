@@ -139,8 +139,7 @@ type
 function TWebAboutStatus.DoContent(AHost:THTTPHost;ARequest:THTTPServerRequest;AResponse:THTTPServerResponse):Boolean; 
 begin
  Log('TWebAboutStatus.DoContent');
- AddItem(AResponse,'QEMU vnc server',Format('host %s port 597%s',[EffectiveIpAddress,QemuHostIpPortDigit]));
- AddItem(AResponse,'Web Browser vncviewer',MakeLink(Format('use host %s port 577%s - note port 577%s, not 597%s',[EffectiveIpAddress,QemuHostIpPortDigit,QemuHostIpPortDigit,QemuHostIpPortDigit]),'http://novnc.com/noVNC/vnc.html'));
+ AddItem(AResponse,'QEMU vnc server',Format('Connect vnc viewer to host %s port 597%s or ',[EffectiveIpAddress,QemuHostIpPortDigit]) + MakeLink('use web browser',Format('http://novnc.com/noVNC/vnc_auto.html?host=%s&port=577%s&reconnect=1&reconnect_delay=5',[EffectiveIpAddress,QemuHostIpPortDigit])));
  AddItem(AResponse,'CircleCI Build:',MakeLink(Format('Build #%d markfirmware/ultibo-webstatus (branch test-20170425)',[BuildNumber]),Format('https://circleci.com/gh/markfirmware/ultibo-webstatus/%d#artifacts/containers/0',[BuildNumber])));
  AddItem(AResponse,'GitHub Source:',MakeLink('markfirmware/ultibo-webstatus (branch test-20170425)','https://github.com/markfirmware/ultibo-webstatus/tree/test-20170425'));
  Result:=True;
@@ -302,10 +301,14 @@ begin
     if KeyPressed then
      begin
       Key:=ReadKey;
-      WriteLn(Format('KeyPressed %s',[Key]));
+      WriteLn(Format('KeyPressed <%s> %d',[Key,Ord(Key)]));
       if Key = 'r' then
        begin
         SystemReset;
+       end;
+      if Ord(Key) = 163 then
+       begin
+        Log('power reset requested');
        end;
      end;
     while True do
