@@ -24,7 +24,6 @@ def getbuild (circle, username, project, branch):
 #   if os.path.exists (e):
 #       shutil.rmtree (e)
     for a in artifacts:
-        r = requests.get (a ['url'])
         parts = a ['pretty_path'].split (os.sep, 1)
         a ['short_path'] = parts [1]
         p = os.path.join (e, a ['short_path'])
@@ -36,6 +35,7 @@ def getbuild (circle, username, project, branch):
             d = os.path.dirname (p)
             if not os.path.exists (d):
                 os.makedirs (d)
+            r = requests.get (a ['url'])
             with open (p, 'wb') as fd:
                 for chunk in r.iter_content (chunk_size=4096):
                     fd.write (chunk)
