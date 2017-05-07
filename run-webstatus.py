@@ -21,8 +21,8 @@ def getbuild (circle, username, project, branch):
     artifacts = circle.build.artifacts (username, project, buildnumber)
     artifacts = sorted (artifacts, key = lambda a: a ['pretty_path'])
     e = os.path.join ('instance-' + portdigit, 'artifacts', 'build-' + str (buildnumber))
-    if os.path.exists (e):
-        shutil.rmtree (e)
+#   if os.path.exists (e):
+#       shutil.rmtree (e)
     for a in artifacts:
         r = requests.get (a ['url'])
         parts = a ['pretty_path'].split (os.sep, 1)
@@ -32,12 +32,13 @@ def getbuild (circle, username, project, branch):
             kernelpath = p
             print 'kernel', kernelpath
         print a ['short_path']
-        d = os.path.dirname (p)
-        if not os.path.exists (d):
-            os.makedirs (d)
-        with open (p, 'wb') as fd:
-            for chunk in r.iter_content (chunk_size=4096):
-                fd.write (chunk)
+        if not os.path.exists (p):
+            d = os.path.dirname (p)
+            if not os.path.exists (d):
+                os.makedirs (d)
+            with open (p, 'wb') as fd:
+                for chunk in r.iter_content (chunk_size=4096):
+                    fd.write (chunk)
     return True
 
 def get_ip_address(ifname):
