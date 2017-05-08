@@ -176,8 +176,6 @@ begin
  {$ifdef CONTROLLER_QEMUVPB}
   Log('');
   Log('system reset requested');
-  GotoXY(20,1);
-  Write('System reset requested - will take no more than 3 seconds                                ');
   Sleep(1 * 1000);
   PLongWord(VERSATILEPB_SYS_LOCK)^:=$a05f;
   SysResetRegister:=PLongWord(VERSATILEPB_SYS_LOCK)^;
@@ -333,16 +331,16 @@ begin
     X:=WhereX;
     Y:=WhereY;
     GotoXY(20,1);
-    Write(Format('Frame Count %3d Rate %5.1f Hz',[FrameMeter.GetCount,FrameMeter.RateInHz]));
+    Write(Format('   Frame Count %3d Rate %5.1f Hz',[FrameMeter.GetCount,FrameMeter.RateInHz]));
     ClrEol;
     GotoXY(20,2);
-    Write(Format('Mouse Count %3d Rate %5.1f Hz dx %d dy %d',[MouseMeter.Count,MouseMeter.RateInHz,MouseOffsetX,MouseOffsetY]));
+    Write(Format('   Mouse Count %3d Rate %5.1f Hz dx %d dy %d',[MouseMeter.Count,MouseMeter.RateInHz,MouseOffsetX,MouseOffsetY]));
     ClrEol;
     GotoXY(20,3);
-    Write(Format('RTC %d Clock %d Delta %8d',[Rtc,Clock,TimeDelta]));
+    Write(Format('   RTC %d Clock %d Delta %8d',[Rtc,Clock,TimeDelta]));
     ClrEol;
     GotoXY(20,4);
-    Write(Format('ClockSeconds %d Error %d',[ClockSecondsValue - InitialClockSeconds, Rtc div (1000*1000) - ClockSecondsValue - InitialClockSeconds]));
+    Write(Format('   ClockSeconds %d Error %d',[ClockSecondsValue - InitialClockSeconds, Rtc div (1000*1000) - ClockSecondsValue - InitialClockSeconds]));
     ClrEol;
     GotoXY(X,Y);
    end;
