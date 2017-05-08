@@ -36,9 +36,16 @@ begin
 end;
 
 procedure Log(S:String);
+var
+ X,Y:Cardinal;
 begin
  LoggingOutput(S);
  WriteLn(S);
+ X:=WhereX;
+ Y:=WhereY;
+ GotoXY(1,6);
+ ClrEol;
+ GotoXY(X,Y);
 end;
 
 procedure StartLogging;
@@ -114,19 +121,16 @@ begin
     begin
      Start:=PosEx('=',Param);
      BuildNumber:=StrToInt(MidStr(Param,Start + 1,Length(Param) - Start));
-     Log(Format('Build Number %d',[BuildNumber]));
     end;
    if AnsiStartsStr('qemuhostip=',Param) then
     begin
      Start:=PosEx('=',Param);
      QemuHostIpAddress:=MidStr(Param,Start + 1,Length(Param) - Start);
-     Log(Format('QEMU Host IP %s',[QemuHostIpAddress]));
     end;
    if AnsiStartsStr('qemuhostportdigit=',Param) then
     begin
      Start:=PosEx('=',Param);
      QemuHostIpPortDigit:=MidStr(Param,Start + 1,Length(Param) - Start);
-     Log(Format('QEMU Host IP Port Digit %s',[QemuHostIpPortDigit]));
     end;
   end;
 end;
@@ -248,7 +252,7 @@ var
  MouseData:TMouseData;
  MouseCount:Cardinal;
  MouseOffsetX,MouseOffsetY:Integer;
- X,Y:Cardinal;
+ I,X,Y:Cardinal;
  Key:Char;
  Clock,InitialClock,ClockSecondsValue,InitialClockSeconds,Rtc,InitialRtc,TimeDelta:Int64;
 begin
@@ -264,9 +268,8 @@ begin
  DetermineEntryState;
  StartLogging;
  Sleep(500);
- Log('');
- Log('');
- Log('');
+ for I:=1 to 6 do
+  Log ('');
  Log('program start');
  ParseCommandLine;
  Log(Format('Ultibo Release %s %s %s',[ULTIBO_RELEASE_DATE,ULTIBO_RELEASE_NAME,ULTIBO_RELEASE_VERSION]));
@@ -301,7 +304,7 @@ begin
     if KeyPressed then
      begin
       Key:=ReadKey;
-      WriteLn(Format('KeyPressed <%s> %d',[Key,Ord(Key)]));
+      Log(Format('KeyPressed <%s> %d',[Key,Ord(Key)]));
       if Key = 'r' then
        begin
         SystemReset;
@@ -330,10 +333,16 @@ begin
     X:=WhereX;
     Y:=WhereY;
     GotoXY(20,1);
-    Write(Format('Frame Count %3d Rate %5.1f Hz Mouse rate %5.1f Hz dx %d dy %d',[FrameMeter.GetCount,FrameMeter.RateInHz,MouseMeter.RateInHz,MouseOffsetX,MouseOffsetY]));
+    Write(Format('Frame Count %3d Rate %5.1f Hz',[FrameMeter.GetCount,FrameMeter.RateInHz]));
+    ClrEol;
+    GotoXY(20,2);
+    Write(Format('Mouse Count %3d Rate %5.1f Hz dx %d dy %d',[MouseMeter.Count,MouseMeter.RateInHz,MouseOffsetX,MouseOffsetY]));
     ClrEol;
     GotoXY(20,3);
-    Write(Format('RTC %d Clock %d Delta %8d ClockSeconds %d Error %d',[Rtc,Clock,TimeDelta,ClockSecondsValue - InitialClockSeconds, Rtc div (1000*1000) - ClockSecondsValue - InitialClockSeconds]));
+    Write(Format('RTC %d Clock %d Delta %8d',[Rtc,Clock,TimeDelta]));
+    ClrEol;
+    GotoXY(20,4);
+    Write(Format('ClockSeconds %d Error %d',[ClockSecondsValue - InitialClockSeconds, Rtc div (1000*1000) - ClockSecondsValue - InitialClockSeconds]));
     ClrEol;
     GotoXY(X,Y);
    end;
