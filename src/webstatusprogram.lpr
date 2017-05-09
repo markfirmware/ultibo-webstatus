@@ -252,11 +252,10 @@ var
  MouseOffsetX,MouseOffsetY:Integer;
  I,X,Y:Cardinal;
  Key:Char;
- Clock,InitialClock,ClockSecondsValue,InitialClockSeconds,Rtc,InitialRtc,TimeDelta:Int64;
+ Clock,InitialClock,ClockSecondsValue,Rtc,InitialRtc,TimeDelta:Int64;
 begin
  InitialRtc:=SysRtcGetTime;
  InitialClock:=ClockGetTotal;
- InitialClockSeconds:=ClockSeconds;
  BuildNumber:=0;
  FrameMeter:=TRateMeter.Create;
  MouseMeter:=TRateMeter.Create;
@@ -292,7 +291,7 @@ begin
    begin
     Rtc:=SysRtcGetTime;
     Clock:=ClockGetTotal;
-    ClockSecondsValue:=ClockSeconds;
+    ClockSecondsValue:=ClockSeconds - InitialClock div (1000*1000);
     Rtc:=Rtc - InitialRtc;
     Rtc:=Rtc div 10;
     Clock:=Clock - InitialClock;
@@ -340,7 +339,7 @@ begin
     Write(Format('   RTC %d Clock %d Delta %8d',[Rtc,Clock,TimeDelta]));
     ClrEol;
     GotoXY(20,4);
-    Write(Format('   ClockSeconds %d Error %d',[ClockSecondsValue - InitialClockSeconds, Rtc div (1000*1000) - ClockSecondsValue - InitialClockSeconds]));
+    Write(Format('   ClockSeconds %d Error %d',[ClockSecondsValue, Clock div (1000*1000) - ClockSecondsValue]));
     ClrEol;
     GotoXY(X,Y);
    end;
