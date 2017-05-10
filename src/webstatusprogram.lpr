@@ -333,7 +333,7 @@ begin
     Write(Format('   Frame Count %3d Rate %5.1f Hz',[FrameMeter.GetCount,FrameMeter.RateInHz]));
     ClrEol;
     GotoXY(20,2);
-    Write(Format('   Mouse Count %3d Rate %5.1f Hz dx %d dy %d',[MouseMeter.Count,MouseMeter.RateInHz,MouseOffsetX,MouseOffsetY]));
+    Write(Format('   Mouse Count %3d Rate %5.1f Hz dx %3d dy %3d',[MouseMeter.Count,MouseMeter.RateInHz,MouseOffsetX,MouseOffsetY]));
     ClrEol;
     GotoXY(20,3);
     Write(Format('   Clock %d RTC %d',[Clock,Rtc]));
