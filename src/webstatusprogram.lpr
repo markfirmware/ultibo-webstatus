@@ -324,6 +324,11 @@ begin
       else
        begin
         MouseMeter.FlushInSeconds(0.3);
+        if MouseMeter.GetCount = 0 then
+         begin
+          MouseOffsetX:=0;
+          MouseOffsetY:=0;
+         end;
         break;
        end;
      end;
