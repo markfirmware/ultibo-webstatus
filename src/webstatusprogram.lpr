@@ -336,10 +336,13 @@ begin
     Write(Format('   Mouse Count %3d Rate %5.1f Hz dx %d dy %d',[MouseMeter.Count,MouseMeter.RateInHz,MouseOffsetX,MouseOffsetY]));
     ClrEol;
     GotoXY(20,3);
-    Write(Format('   RTC %d Clock %d Delta %8d',[Rtc,Clock,TimeDelta]));
+    Write(Format('   Clock %d RTC %d',[Clock,Rtc]));
     ClrEol;
     GotoXY(20,4);
     Write(Format('   ClockSeconds %d Error %d',[ClockSecondsValue, Clock div (1000*1000) - ClockSecondsValue]));
+    ClrEol;
+    GotoXY(20,5);
+    Write(Format('   ',[]));
     ClrEol;
     GotoXY(X,Y);
    end;
