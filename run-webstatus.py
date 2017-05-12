@@ -6,9 +6,20 @@ from circleclient import circleclient
 portdigit = sys.argv [1]
 
 username = 'markfirmware'
-project = 'ultibo-webstatus'
-branch = 'test-20170425'
 ports = 'hostfwd=tcp::8' + portdigit + '-:80'
+
+if portdigit == '1':
+    project = 'Examples'
+    branch = 'pilot-test-20170511'
+    folder = '05-TimeDate'
+elif portdigit == '2':
+    project = 'Examples'
+    branch = 'pilot-test-20170511'
+    folder = '09-LogOutput'
+else:
+    project = 'ultibo-webstatus'
+    branch = 'test-20170425'
+    foler = ''
 
 def getbuild (circle, username, project, branch):
     global artifacts, kernelpath, buildnumber
@@ -27,18 +38,20 @@ def getbuild (circle, username, project, branch):
         parts = a ['pretty_path'].split (os.sep, 1)
         a ['short_path'] = parts [1]
         p = os.path.join (e, a ['short_path'])
-        if os.path.basename (p) == 'kernel.bin':
+        if folder == '' or folder in p:
+            if not os.path.exists (p):
+                d = os.path.dirname (p)
+                if not os.path.exists (d):
+                    os.makedirs (d)
+                print 'fetch', a ['short_path']
+                r = requests.get (a ['url'])
+                with open (p, 'wb') as fd:
+                    for chunk in r.iter_content (chunk_size=4096):
+                        fd.write (chunk)
+        if os.path.basename (p) == 'kernel.bin' and (folder == '' or folder in p):
             kernelpath = p
             print 'kernel', kernelpath
-        print a ['short_path']
-        if not os.path.exists (p):
-            d = os.path.dirname (p)
-            if not os.path.exists (d):
-                os.makedirs (d)
-            r = requests.get (a ['url'])
-            with open (p, 'wb') as fd:
-                for chunk in r.iter_content (chunk_size=4096):
-                    fd.write (chunk)
+            break
     return True
 
 def get_ip_address(ifname):
@@ -53,7 +66,7 @@ def get_ip_address(ifname):
 
 def runqemu (kernelpath):
     global buildnumber, qemu, qemuhostlocation
-    cmdline = 'xNETWORK0_IP_CONFIG=STATIC xNETWORK0_IP_ADDRESS=10.0.2.10{} xNETWORK0_IP_NETMASK=255.255.255.0 xNETWORK0_IP_GATEWAY=10.0.2.1 qemuhostlocation={} qemuhostip={} qemuhostportdigit={} username={} project={} branch={} buildnumber={}'.format (portdigit, qemuhostlocation, get_ip_address ('eth0'), portdigit, username, project, branch, buildnumber)
+    cmdline = 'xNETWORK0_IP_CONFIG=STATIC xNETWORK0_IP_ADDRESS=10.0.2.10{} xNETWORK0_IP_NETMASK=255.255.255.0 xNETWORK0_IP_GATEWAY=10.0.2.1 pilot=Serial0 qemuhostlocation={} qemuhostip={} qemuhostportdigit={} username={} project={} branch={} buildnumber={}'.format (portdigit, qemuhostlocation, get_ip_address ('eth0'), portdigit, username, project, branch, buildnumber)
     qemu = subprocess.Popen (["qemu-system-arm",
                               "-M", "versatilepb",
                               "-cpu", "cortex-a8",
@@ -68,6 +81,7 @@ def runqemu (kernelpath):
                              stdin=subprocess.PIPE,
                              stdout=subprocess.PIPE,
                              stderr=subprocess.PIPE)
+    print "qemu started"
     while qemu.poll () == None:
         line = qemu.stdout.readline ()
         print line,
@@ -80,6 +94,9 @@ def runqemu (kernelpath):
                 print 'system reset seems to have failed - restarting qemu'
                 break
         if 'power reset requested' in line:
+            print 'detected power reset request'
+            break
+        if 'ctrlaltdel' in line:
             print 'detected power reset request'
             break
         time.sleep (0.01)
