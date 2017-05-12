@@ -19,10 +19,10 @@ elif portdigit == '2':
 else:
     project = 'ultibo-webstatus'
     branch = 'test-20170425'
-    foler = ''
+    folder = ''
 
 def getbuild (circle, username, project, branch):
-    global artifacts, kernelpath, buildnumber
+    global artifacts, folder, kernelpath, buildnumber
     builds = circle.build.recent (username, project, branch=branch)
     build = builds [0]
     buildnumber = build ['build_num']
@@ -48,10 +48,10 @@ def getbuild (circle, username, project, branch):
                 with open (p, 'wb') as fd:
                     for chunk in r.iter_content (chunk_size=4096):
                         fd.write (chunk)
-        if os.path.basename (p) == 'kernel.bin' and (folder == '' or folder in p):
-            kernelpath = p
-            print 'kernel', kernelpath
-            break
+            if os.path.basename (p) == 'kernel.bin':
+                kernelpath = p
+                print 'kernel', kernelpath
+                break
     return True
 
 def get_ip_address(ifname):
