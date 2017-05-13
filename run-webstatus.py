@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import fcntl, json, os, requests, select, shutil, socket, struct, subprocess, sys, time
+import fcntl, hashlib, json, os, requests, select, shutil, socket, struct, subprocess, sys, time
 from circleclient import circleclient
 
 portdigit = sys.argv [1]
@@ -70,8 +70,10 @@ def get_ip_address(ifname):
 
 def runqemu (kernelpath):
     global buildnumber, qemu, qemuhostlocation
-    cmdline = 'xNETWORK0_IP_CONFIG=STATIC xNETWORK0_IP_ADDRESS=10.0.2.10{} xNETWORK0_IP_NETMASK=255.255.255.0 xNETWORK0_IP_GATEWAY=10.0.2.1 pilot=Serial0 qemuhostlocation={} qemuhostip={} qemuhostportdigit={} username={} project={} branch={} buildnumber={}'.format (portdigit, qemuhostlocation, get_ip_address ('eth0'), portdigit, username, project, branch, buildnumber)
-    qemu = subprocess.Popen (["qemu-system-arm",
+    kernelsha256 = hashlib.sha256 (open (kernelpath).read ()).hexdigest ()
+    qemusha256 = hashlib.sha256 (open ('/usr/bin/qemu-system-arm').read ()).hexdigest ()
+    cmdline = 'xNETWORK0_IP_CONFIG=STATIC xNETWORK0_IP_ADDRESS=10.0.2.10{} xNETWORK0_IP_NETMASK=255.255.255.0 xNETWORK0_IP_GATEWAY=10.0.2.1 pilot=Serial0 kernelsha256={} qemusha256={} qemuhostlocation={} qemuhostip={} qemuhostportdigit={} username={} project={} branch={} buildnumber={}'.format (portdigit, kernelsha256, qemusha256, qemuhostlocation, get_ip_address ('eth0'), portdigit, username, project, branch, buildnumber)
+    qemu = subprocess.Popen (["/usr/bin/qemu-system-arm",
                               "-M", "versatilepb",
                               "-cpu", "cortex-a8",
                               "-kernel", kernelpath,

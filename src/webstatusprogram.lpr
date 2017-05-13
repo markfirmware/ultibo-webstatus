@@ -113,6 +113,7 @@ var
  I,Start:Cardinal;
  Param:String;
 begin
+ Log(Format('Command Line = <%s>',[GetCommandLine]));
  for I:=0 to ParamCount do
   begin
    Param:=ParamStr(I);
