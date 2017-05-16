@@ -24,6 +24,10 @@ elif portdigit == '4':
     project = 'Examples'
     branch = 'pilot-test-20170511'
     folder = '17-TextEditor'
+elif portdigit == '5':
+    project = 'Examples'
+    branch = 'pilot-test-20170511'
+    folder = '01-HellowWorld'
 else:
     project = 'ultibo-webstatus'
     branch = 'test-20170425'
