@@ -250,7 +250,8 @@ procedure Main;
 var
  MouseData:TMouseData;
  MouseCount:Cardinal;
- MouseOffsetX,MouseOffsetY:Integer;
+ MouseButtons:Word;
+ MouseOffsetX,MouseOffsetY,MouseOffsetWheel:Integer;
  I,X,Y:Cardinal;
  Key:Char;
  Clock,InitialClock,ClockSecondsValue,Rtc,InitialRtc,TimeDelta:Int64;
@@ -262,6 +263,8 @@ begin
  MouseMeter:=TRateMeter.Create;
  MouseOffsetX:=0;
  MouseOffsetY:=0;
+ MouseOffsetWheel:=0;
+ MouseButtons:=0;
  QemuHostIpAddress:='';
  DetermineEntryState;
  StartLogging;
@@ -321,6 +324,8 @@ begin
         MouseMeter.Increment;
         MouseOffsetX:=MouseData.OffsetX;
         MouseOffsetY:=MouseData.OffsetY;
+        MouseOffsetWheel:=MouseData.OffsetWheel;
+        MouseButtons:=MouseData.Buttons;
        end
       else
        begin
@@ -329,6 +334,7 @@ begin
          begin
           MouseOffsetX:=0;
           MouseOffsetY:=0;
+          MouseOffsetWheel:=0;
          end;
         break;
        end;
@@ -339,7 +345,7 @@ begin
     Write(Format('   Frame Count %3d Rate %5.1f Hz',[FrameMeter.GetCount,FrameMeter.RateInHz]));
     ClrEol;
     GotoXY(20,2);
-    Write(Format('   Mouse Count %3d Rate %5.1f Hz dx %3d dy %3d',[MouseMeter.Count,MouseMeter.RateInHz,MouseOffsetX,MouseOffsetY]));
+    Write(Format('   Mouse Count %3d Rate %5.1f Hz dx %3d dy %3d dw %3d Buttons %4.4x',[MouseMeter.Count,MouseMeter.RateInHz,MouseOffsetX,MouseOffsetY,MouseOffsetWheel,MouseButtons]));
     ClrEol;
     GotoXY(20,3);
     Write(Format('   Clock %d RTC %d',[Clock,Rtc]));
