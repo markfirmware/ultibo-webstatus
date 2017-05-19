@@ -18,7 +18,7 @@ elif portdigit == '2':
     folder = '09-LogOutput'
 elif portdigit == '3':
     project = 'ultibo-webstatus'
-    branch = 'wrong-display-line-20170512'
+    branch = 'wrong-line-20170519'
     folder = ''
 elif portdigit == '4':
     project = 'Examples'
