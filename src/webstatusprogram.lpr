@@ -7,7 +7,7 @@ uses
  {$ifdef CONTROLLER_RPI3}                BCM2837,BCM2710,PlatformRPi3,                {$endif}
  {$ifdef CONTROLLER_QEMUVPB}             QEMUVersatilePB,PlatformQemuVpb,VersatilePB, {$endif}
 
- Classes,Console,GlobalConfig,GlobalConst,
+ Classes,Console,GlobalConfig,GlobalConst,GlobalTypes,
  HTTP,Ip,Logging,Mouse,Network,Platform,Rtc,Serial,
  StrUtils,SysUtils,Ultibo,WebStatus,Winsock2;
 
@@ -256,6 +256,7 @@ var
  Key:Char;
  Clock,InitialClock,ClockSecondsValue,Rtc,InitialRtc,TimeDelta:Int64;
 begin
+ ConsoleWindowCreate(ConsoleDeviceGetDefault,CONSOLE_POSITION_FULL,True);
  InitialRtc:=SysRtcGetTime;
  InitialClock:=ClockGetTotal;
  BuildNumber:=0;
