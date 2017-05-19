@@ -7,7 +7,7 @@ uses
  {$ifdef CONTROLLER_RPI3}                BCM2837,BCM2710,PlatformRPi3,                {$endif}
  {$ifdef CONTROLLER_QEMUVPB}             QEMUVersatilePB,PlatformQemuVpb,VersatilePB, {$endif}
 
- Classes,Crt,GlobalConfig,GlobalConst,
+ Classes,Console,GlobalConfig,GlobalConst,
  HTTP,Ip,Logging,Mouse,Network,Platform,Rtc,Serial,
  StrUtils,SysUtils,Ultibo,WebStatus,Winsock2;
 
@@ -41,11 +41,11 @@ var
 begin
  LoggingOutput(S);
  WriteLn(S);
- X:=WhereX;
- Y:=WhereY;
- GotoXY(1,6);
- ClrEol;
- GotoXY(X,Y);
+ X:=ConsoleWhereX;
+ Y:=ConsoleWhereY;
+ ConsoleGotoXY(1,6);
+ ConsoleClrEol;
+ ConsoleGotoXY(X,Y);
 end;
 
 procedure StartLogging;
@@ -302,9 +302,9 @@ begin
     TimeDelta:=Clock;
     TimeDelta:=TimeDelta - Rtc;
     FrameMeter.Increment;
-    if KeyPressed then
+    if ConsoleKeyPressed then
      begin
-      Key:=ReadKey;
+      Key:=ConsoleReadKey;
       Log(Format('KeyPressed <%s> %d',[Key,Ord(Key)]));
       if Key = 'r' then
        begin
@@ -339,24 +339,24 @@ begin
         break;
        end;
      end;
-    X:=WhereX;
-    Y:=WhereY;
-    GotoXY(20,1);
+    X:=ConsoleWhereX;
+    Y:=ConsoleWhereY;
+    ConsoleGotoXY(20,1);
     Write(Format('   Frame Count %3d Rate %5.1f Hz',[FrameMeter.GetCount,FrameMeter.RateInHz]));
-    ClrEol;
-    GotoXY(20,2);
+    ConsoleClrEol;
+    ConsoleGotoXY(20,2);
     Write(Format('   Mouse Count %3d Rate %5.1f Hz dx %3d dy %3d dw %3d Buttons %4.4x',[MouseMeter.Count,MouseMeter.RateInHz,MouseOffsetX,MouseOffsetY,MouseOffsetWheel,MouseButtons]));
-    ClrEol;
-    GotoXY(20,3);
+    ConsoleClrEol;
+    ConsoleGotoXY(20,3);
     Write(Format('   Clock %d RTC %d',[Clock,Rtc]));
-    ClrEol;
-    GotoXY(20,4);
+    ConsoleClrEol;
+    ConsoleGotoXY(20,4);
     Write(Format('   ClockSeconds %d Error %d',[ClockSecondsValue, Clock div (1000*1000) - ClockSecondsValue]));
-    ClrEol;
-    GotoXY(20,5);
+    ConsoleClrEol;
+    ConsoleGotoXY(20,5);
     Write(Format('   ',[]));
-    ClrEol;
-    GotoXY(X,Y);
+    ConsoleClrEol;
+    ConsoleGotoXY(X,Y);
    end;
 end;
 
