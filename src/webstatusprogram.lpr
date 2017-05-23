@@ -346,7 +346,7 @@ begin
     Write(Format('   Mouse Count %3d Rate %5.1f Hz dx %4d dy %4d dw %d Buttons %4.4x',[MouseMeter.Count,MouseMeter.RateInHz,MouseOffsetX,MouseOffsetY,MouseOffsetWheel,MouseButtons]));
     ConsoleClrEol;
     ConsoleGotoXY(20,3);
-    Write(Format('   Clock %8d RTC %9d',[CapturedClockGetTotal,AdjustedRtc]));
+    Write(Format('   Clock %8d RTC (adjusted) %9d',[CapturedClockGetTotal,AdjustedRtc]));
     ConsoleClrEol;
     ConsoleGotoXY(20,4);
     Write(Format('   ClockSeconds %d Error %d',[CapturedClockSeconds, CapturedClockGetTotal div (1000*1000) - CapturedClockSeconds]));
