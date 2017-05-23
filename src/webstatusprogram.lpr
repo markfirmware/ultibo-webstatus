@@ -177,6 +177,7 @@ begin
  {$ifdef CONTROLLER_QEMUVPB}
   Log('');
   Log('system reset requested');
+  ConsoleClrScr;
   Sleep(1 * 1000);
   PLongWord(VERSATILEPB_SYS_LOCK)^:=$a05f;
   SysResetRegister:=PLongWord(VERSATILEPB_SYS_RESETCTL)^;
