@@ -179,7 +179,7 @@ begin
   Log('system reset requested');
   Sleep(1 * 1000);
   PLongWord(VERSATILEPB_SYS_LOCK)^:=$a05f;
-  SysResetRegister:=PLongWord(VERSATILEPB_SYS_LOCK)^;
+  SysResetRegister:=PLongWord(VERSATILEPB_SYS_RESETCTL)^;
   SysResetRegister:=SysResetRegister or $105;
   PLongWord(VERSATILEPB_SYS_RESETCTL)^:=SysResetRegister;
   PLongWord(VERSATILEPB_SYS_LOCK)^:=$0;
