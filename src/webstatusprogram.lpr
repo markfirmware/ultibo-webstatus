@@ -175,9 +175,9 @@ var
 {$endif} 
 begin
  {$ifdef CONTROLLER_QEMUVPB}
+  ConsoleClrScr;
   Log('');
   Log('system reset requested');
-  ConsoleClrScr;
   Sleep(1 * 1000);
   PLongWord(VERSATILEPB_SYS_LOCK)^:=$a05f;
   SysResetRegister:=PLongWord(VERSATILEPB_SYS_RESETCTL)^;
@@ -255,11 +255,11 @@ var
  MouseOffsetX,MouseOffsetY,MouseOffsetWheel:Integer;
  I,X,Y:Cardinal;
  Key:Char;
- Clock,InitialClock,ClockSecondsValue,Rtc,InitialRtc,TimeDelta:Int64;
+ CapturedClockGetTotal,CapturedClockSeconds,CapturedSysRtcGetTime:Int64;
+ AdjustedRtc,RtcAdjustment:Int64;
 begin
  ConsoleWindowCreate(ConsoleDeviceGetDefault,CONSOLE_POSITION_FULL,True);
- InitialRtc:=SysRtcGetTime;
- InitialClock:=ClockGetTotal;
+ RtcAdjustment:=SysRtcGetTime - ClockGetTotal * 10;
  BuildNumber:=0;
  FrameMeter:=TRateMeter.Create;
  MouseMeter:=TRateMeter.Create;
@@ -295,14 +295,10 @@ begin
  if InService then
   while True do
    begin
-    Rtc:=SysRtcGetTime;
-    Clock:=ClockGetTotal;
-    ClockSecondsValue:=ClockSeconds - InitialClock div (1000*1000);
-    Rtc:=Rtc - InitialRtc;
-    Rtc:=Rtc div 10;
-    Clock:=Clock - InitialClock;
-    TimeDelta:=Clock;
-    TimeDelta:=TimeDelta - Rtc;
+    CapturedSysRtcGetTime:=SysRtcGetTime;
+    CapturedClockGetTotal:=ClockGetTotal;
+    CapturedClockSeconds:=ClockSeconds;
+    AdjustedRtc:=(CapturedSysRtcGetTime - RtcAdjustment) div (10*1000*1000) * (10*1000*1000);
     FrameMeter.Increment;
     if ConsoleKeyPressed then
      begin
@@ -350,10 +346,10 @@ begin
     Write(Format('   Mouse Count %3d Rate %5.1f Hz dx %4d dy %4d dw %d Buttons %4.4x',[MouseMeter.Count,MouseMeter.RateInHz,MouseOffsetX,MouseOffsetY,MouseOffsetWheel,MouseButtons]));
     ConsoleClrEol;
     ConsoleGotoXY(20,3);
-    Write(Format('   Clock %d RTC %d',[Clock,Rtc]));
+    Write(Format('   Clock %8d RTC %9d',[CapturedClockGetTotal,AdjustedRtc]));
     ConsoleClrEol;
     ConsoleGotoXY(20,4);
-    Write(Format('   ClockSeconds %d Error %d',[ClockSecondsValue, Clock div (1000*1000) - ClockSecondsValue]));
+    Write(Format('   ClockSeconds %d Error %d',[CapturedClockSeconds, CapturedClockGetTotal div (1000*1000) - CapturedClockSeconds]));
     ConsoleClrEol;
     ConsoleGotoXY(20,5);
     Write(Format('   ',[]));
