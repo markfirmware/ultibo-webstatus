@@ -8,7 +8,7 @@ uses
  {$ifdef CONTROLLER_QEMUVPB}             QEMUVersatilePB,PlatformQemuVpb,VersatilePB, {$endif}
 
  Classes,Console,GlobalConfig,GlobalConst,GlobalTypes,
- HTTP,Ip,Logging,Mouse,Network,Platform,Rtc,Serial,
+ HeapManager,HTTP,Ip,Logging,Mouse,Network,Platform,Rtc,Serial,
  StrUtils,SysUtils,Ultibo,WebStatus,Winsock2;
 
 type
@@ -81,10 +81,74 @@ begin
   raise Exception.Create('Exception - unassigned pointer');
 end;
 
+const
+ HEAP_FLAG_PERSISTENT=$08000000;
+
+type
+ PPersistentStorage = ^TPersistentStorage;
+ TPersistentStorage = packed record
+  ReservedForHeapManager:array[0..31] of Byte;
+  Signature:LongWord;
+  ResetCount:LongWord;
+  ExitClockCount:LongWord;
+ end;
+
+ TPersistentMemory = record
+  Valid:Boolean;
+  Storage:PPersistentStorage;
+  constructor Create(Where:Pointer);
+  function GetResetCount:LongWord;
+  function GetExitClockCount:LongWord;
+  procedure SetExitClockCount(Count:LongWord);
+ end;
+
 var
  IpAddress:String;
  EffectiveIpAddress:String;
  HTTPListener:THTTPListener;
+
+constructor TPersistentMemory.Create(Where:Pointer);
+const
+ InitializationSignature=$73AF72EC;
+begin
+ Storage:=PPersistentStorage(RequestHeapBlock(Where,1*1024*1024,HEAP_FLAG_PERSISTENT,CPU_AFFINITY_NONE));
+ Valid:=Storage = Where;
+ if Valid then
+  begin
+   if Storage.Signature <> InitializationSignature then
+    begin
+     Storage.Signature:=InitializationSignature;
+     Storage.ResetCount:=0;
+     Storage.ExitClockCount:=0;
+    end
+   else
+    begin
+     Inc(Storage.ResetCount);
+    end;
+  end;
+end;
+
+function TPersistentMemory.GetResetCount:LongWord;
+begin
+ if Valid then
+  Result:=Storage.ResetCount
+ else
+  Result:=0;
+end;
+
+function TPersistentMemory.GetExitClockCount:LongWord;
+begin
+ if Valid then
+  Result:=Storage.ExitClockCount
+ else
+  Result:=0;
+end;
+
+procedure TPersistentMemory.SetExitClockCount(Count:LongWord);
+begin
+ if Valid then
+  Storage.ExitClockCount:=Count;
+end;
 
 function GetIpAddress:String;
 var
@@ -171,27 +235,6 @@ end;
 var
  Window:TWindowHandle;
 
-procedure SystemReset;
-{$ifdef CONTROLLER_QEMUVPB}
-var
- SysResetRegister:LongWord;
-{$endif} 
-begin
- {$ifdef CONTROLLER_QEMUVPB}
-  ConsoleWindowSetBackColor(Window,COLOR_YELLOW);
-  ConsoleClrScr;
-  Log('');
-  Log('system reset initiated');
-  Log('this can take up to 5 seconds ...');
-  Sleep(1 * 1000);
-  PLongWord(VERSATILEPB_SYS_LOCK)^:=$a05f;
-  SysResetRegister:=PLongWord(VERSATILEPB_SYS_RESETCTL)^;
-  SysResetRegister:=SysResetRegister or $105;
-  PLongWord(VERSATILEPB_SYS_RESETCTL)^:=SysResetRegister;
-  PLongWord(VERSATILEPB_SYS_LOCK)^:=$0;
- {$endif} 
-end;
-
 type
  TRateMeter = class
   Count:Cardinal;
@@ -252,6 +295,31 @@ begin
  Result:=Count;
 end;
 
+var
+ PersistentMemory:TPersistentMemory;
+
+procedure SystemReset;
+{$ifdef CONTROLLER_QEMUVPB}
+var
+ SysResetRegister:LongWord;
+{$endif} 
+begin
+ {$ifdef CONTROLLER_QEMUVPB}
+  ConsoleWindowSetBackColor(Window,COLOR_YELLOW);
+  ConsoleClrScr;
+  Log('');
+  Log('system reset initiated');
+  Log('this can take up to 5 seconds ...');
+  Sleep(1 * 1000);
+  PersistentMemory.SetExitClockCount(ClockGetCount);
+  PLongWord(VERSATILEPB_SYS_LOCK)^:=$a05f;
+  SysResetRegister:=PLongWord(VERSATILEPB_SYS_RESETCTL)^;
+  SysResetRegister:=SysResetRegister or $105;
+  PLongWord(VERSATILEPB_SYS_RESETCTL)^:=SysResetRegister;
+  PLongWord(VERSATILEPB_SYS_LOCK)^:=$0;
+ {$endif} 
+end;
+
 procedure Main;
 var
  MouseData:TMouseData;
@@ -263,6 +331,7 @@ var
  CapturedClockGetTotal,CapturedClockSeconds,CapturedSysRtcGetTime:Int64;
  AdjustedRtc,RtcAdjustment:Int64;
 begin
+ PersistentMemory:=TPersistentMemory.Create(Pointer((64 - 1) * 1024*1024));
  Window:=ConsoleWindowCreate(ConsoleDeviceGetDefault,CONSOLE_POSITION_FULL,True);
  ConsoleWindowSetBackColor(Window,COLOR_WHITE);
  RtcAdjustment:=SysRtcGetTime - ClockGetTotal * 10;
@@ -280,6 +349,7 @@ begin
  for I:=1 to 6 do
   Log ('');
  Log('program start');
+ Log(Format('ResetCount %d Elapsed %5.3f seconds',[PersistentMemory.GetResetCount, (ClockGetCount - PersistentMemory.GetExitClockCount) / (1000*1000)]));
  ParseCommandLine;
  Log(Format('Ultibo Release %s %s %s',[ULTIBO_RELEASE_DATE,ULTIBO_RELEASE_NAME,ULTIBO_RELEASE_VERSION]));
  if Controller = QemuVpb then
