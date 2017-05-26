@@ -264,6 +264,7 @@ var
  AdjustedRtc,RtcAdjustment:Int64;
 begin
  Window:=ConsoleWindowCreate(ConsoleDeviceGetDefault,CONSOLE_POSITION_FULL,True);
+ ConsoleWindowSetBackColor(Window,COLOR_WHITE);
  RtcAdjustment:=SysRtcGetTime - ClockGetTotal * 10;
  BuildNumber:=0;
  FrameMeter:=TRateMeter.Create;
