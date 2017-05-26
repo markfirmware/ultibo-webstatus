@@ -101,13 +101,13 @@ def runqemu (kernelpath):
         print line,
         if 'program stop' in line:
             break
-        if 'system reset requested' in line:
+        if 'system reset initiated' in line:
             print 'detected system reset request'
-            time.sleep (5)
+            time.sleep (10)
             if not waitforstart ():
                 print 'system reset seems to have failed - restarting qemu'
                 break
-        if 'power reset requested' in line:
+        if 'power reset initiated' in line:
             print 'detected power reset request'
             break
         if 'ctrlaltdel' in line:

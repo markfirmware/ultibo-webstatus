@@ -168,6 +168,9 @@ begin
   Log(Format('HTTPClient error %d %s',[HTTPClient.ResponseStatus,HTTPClient.ResponseReason]))
 end;
 
+var
+ Window:TWindowHandle;
+
 procedure SystemReset;
 {$ifdef CONTROLLER_QEMUVPB}
 var
@@ -175,9 +178,11 @@ var
 {$endif} 
 begin
  {$ifdef CONTROLLER_QEMUVPB}
+  ConsoleWindowSetBackColor(Window,COLOR_YELLOW);
   ConsoleClrScr;
   Log('');
-  Log('system reset requested');
+  Log('system reset initiated');
+  Log('this can take up to 5 seconds ...');
   Sleep(1 * 1000);
   PLongWord(VERSATILEPB_SYS_LOCK)^:=$a05f;
   SysResetRegister:=PLongWord(VERSATILEPB_SYS_RESETCTL)^;
@@ -258,7 +263,7 @@ var
  CapturedClockGetTotal,CapturedClockSeconds,CapturedSysRtcGetTime:Int64;
  AdjustedRtc,RtcAdjustment:Int64;
 begin
- ConsoleWindowCreate(ConsoleDeviceGetDefault,CONSOLE_POSITION_FULL,True);
+ Window:=ConsoleWindowCreate(ConsoleDeviceGetDefault,CONSOLE_POSITION_FULL,True);
  RtcAdjustment:=SysRtcGetTime - ClockGetTotal * 10;
  BuildNumber:=0;
  FrameMeter:=TRateMeter.Create;
@@ -310,7 +315,7 @@ begin
        end;
       if Ord(Key) = 163 then
        begin
-        Log('power reset requested');
+        Log('power reset initiated');
        end;
      end;
     while True do
