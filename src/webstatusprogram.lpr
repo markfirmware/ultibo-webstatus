@@ -144,7 +144,7 @@ function TPersistentMemory.EstimatedResetSeconds:Double;
 begin
  if Valid then
   begin
-   Result:=(Storage.StartingClockCount - Storage.ClockCountAtLastReset - Storage.ClockCountForColdStart) / (1000*1000);
+   Result:=(Storage.StartingClockCount - Storage.ClockCountAtLastReset) / (1000*1000);
   end
  else
   begin
