@@ -364,7 +364,7 @@ begin
   begin
    EffectiveIpAddress:=QemuHostIpAddress;
    Log('');
-   Log(Format('Web Server Effective URL (running under QEMU) is http://%s:8%s',[EffectiveIpAddress,QemuHostIpPortDigit]));
+   Log(Format('Web Server Effective URL (running under QEMU) is http://%s:557%s',[EffectiveIpAddress,QemuHostIpPortDigit]));
   end
  else
   begin

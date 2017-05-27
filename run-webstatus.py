@@ -6,7 +6,7 @@ from circleclient import circleclient
 portdigit = sys.argv [1]
 
 username = 'markfirmware'
-ports = 'hostfwd=tcp::8' + portdigit + '-:80'
+ports = 'hostfwd=tcp::557' + portdigit + '-:80'
 
 if portdigit == '1':
     project = 'Examples'
