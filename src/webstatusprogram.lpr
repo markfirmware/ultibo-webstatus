@@ -317,8 +317,8 @@ begin
   ConsoleClrScr;
   Log('');
   Log('system reset initiated');
-  Log('this can take up to 5 seconds ...');
   Sleep(1 * 1000);
+  Log('this can take up to 5 seconds ...');
   PersistentMemory.SetClockCountAtLastReset(ClockGetCount);
   PLongWord(VERSATILEPB_SYS_LOCK)^:=$a05f;
   SysResetRegister:=PLongWord(VERSATILEPB_SYS_RESETCTL)^;
