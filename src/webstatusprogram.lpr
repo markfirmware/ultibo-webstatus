@@ -90,7 +90,9 @@ type
   ReservedForHeapManager:array[0..31] of Byte;
   Signature:LongWord;
   ResetCount:LongWord;
-  ExitClockCount:LongWord;
+  ClockCountAtLastReset:LongWord;
+  ClockCountForColdStart:LongWord;
+  StartingClockCount:LongWord;
  end;
 
  TPersistentMemory = record
@@ -98,8 +100,8 @@ type
   Storage:PPersistentStorage;
   constructor Create(Where:Pointer);
   function GetResetCount:LongWord;
-  function GetExitClockCount:LongWord;
-  procedure SetExitClockCount(Count:LongWord);
+  function EstimatedResetSeconds:Double;
+  procedure SetClockCountAtLastReset(Count:LongWord);
  end;
 
 var
@@ -115,11 +117,13 @@ begin
  Valid:=Storage = Where;
  if Valid then
   begin
+   Storage.StartingClockCount:=ClockGetCount;
    if Storage.Signature <> InitializationSignature then
     begin
      Storage.Signature:=InitializationSignature;
      Storage.ResetCount:=0;
-     Storage.ExitClockCount:=0;
+     Storage.ClockCountAtLastReset:=0;
+     Storage.ClockCountForColdStart:=Storage.StartingClockCount;
     end
    else
     begin
@@ -136,18 +140,22 @@ begin
   Result:=0;
 end;
 
-function TPersistentMemory.GetExitClockCount:LongWord;
+function TPersistentMemory.EstimatedResetSeconds:Double;
 begin
  if Valid then
-  Result:=Storage.ExitClockCount
+  begin
+   Result:=(Storage.StartingClockCount - Storage.ClockCountAtLastReset - Storage.ClockCountForColdStart) / (1000*1000);
+  end
  else
-  Result:=0;
+  begin
+   Result:=0;
+  end;
 end;
 
-procedure TPersistentMemory.SetExitClockCount(Count:LongWord);
+procedure TPersistentMemory.SetClockCountAtLastReset(Count:LongWord);
 begin
  if Valid then
-  Storage.ExitClockCount:=Count;
+  Storage.ClockCountAtLastReset:=Count;
 end;
 
 function GetIpAddress:String;
@@ -311,7 +319,7 @@ begin
   Log('system reset initiated');
   Log('this can take up to 5 seconds ...');
   Sleep(1 * 1000);
-  PersistentMemory.SetExitClockCount(ClockGetCount);
+  PersistentMemory.SetClockCountAtLastReset(ClockGetCount);
   PLongWord(VERSATILEPB_SYS_LOCK)^:=$a05f;
   SysResetRegister:=PLongWord(VERSATILEPB_SYS_RESETCTL)^;
   SysResetRegister:=SysResetRegister or $105;
@@ -349,7 +357,7 @@ begin
  for I:=1 to 6 do
   Log ('');
  Log('program start');
- Log(Format('ResetCount %d Elapsed %5.3f seconds',[PersistentMemory.GetResetCount, (ClockGetCount - PersistentMemory.GetExitClockCount) / (1000*1000)]));
+ Log(Format('Reset count %d Estimated reset time %5.3f seconds',[PersistentMemory.GetResetCount,PersistentMemory.EstimatedResetSeconds]));
  ParseCommandLine;
  Log(Format('Ultibo Release %s %s %s',[ULTIBO_RELEASE_DATE,ULTIBO_RELEASE_NAME,ULTIBO_RELEASE_VERSION]));
  if Controller = QemuVpb then
