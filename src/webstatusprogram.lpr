@@ -100,7 +100,7 @@ type
   Storage:PPersistentStorage;
   constructor Create(Where:Pointer);
   function GetResetCount:LongWord;
-  function EstimatedResetSeconds:Double;
+  function SecondsSinceLastReset:Double;
   procedure SetClockCountAtLastReset(Count:LongWord);
  end;
 
@@ -140,11 +140,11 @@ begin
   Result:=0;
 end;
 
-function TPersistentMemory.EstimatedResetSeconds:Double;
+function TPersistentMemory.SecondsSinceLastReset:Double;
 begin
  if Valid then
   begin
-   Result:=(Storage.StartingClockCount - Storage.ClockCountAtLastReset) / (1000*1000);
+   Result:=(ClockGetCount - Storage.ClockCountAtLastReset) / (1000*1000);
   end
  else
   begin
@@ -357,7 +357,7 @@ begin
  for I:=1 to 6 do
   Log ('');
  Log('program start');
- Log(Format('Reset count %d Estimated reset time %5.3f seconds',[PersistentMemory.GetResetCount,PersistentMemory.EstimatedResetSeconds]));
+ Log(Format('Reset count %d Time since last reset %5.3f seconds',[PersistentMemory.GetResetCount,PersistentMemory.SecondsSinceLastReset]));
  ParseCommandLine;
  Log(Format('Ultibo Release %s %s %s',[ULTIBO_RELEASE_DATE,ULTIBO_RELEASE_NAME,ULTIBO_RELEASE_VERSION]));
  if Controller = QemuVpb then
