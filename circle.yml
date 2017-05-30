@@ -1,0 +1,21 @@
+version: 2
+executorType: docker
+containerInfo:
+  - image: markfirmware/ultibo-1.3.271-x64-1.0.0
+# - image: markfirmware/ultibo-docker2-x64-1.3.245-rc5@sha256:54fe092d7ad6141b7ee6656c71f9e9289ff628f90e81179440e03acc756c0d52
+# - image: markfirmware/ultibo-docker2-x64-1.3.245-dbg-rc1@sha256:a4649b9dd6d08a8d0cf917941f96c656b8f8245f045c699634c434fd9e832612
+stages:
+  build:
+    workDir: ~/ultibo-webstatus
+    steps:
+      - type: checkout
+      - name: Build and test
+        type: shell
+        command: ./build.sh
+      - name: List files
+        type: shell
+        command: ls -ltR
+      - name: Save artifacts
+        type: artifacts-store
+        path: artifacts
+        destination: ultibo-webstatus

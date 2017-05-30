@@ -1,0 +1,11 @@
+artifacts/
+build-output/
+lib/
+obj/
+build-errors.txt
+*.bak
+*.bin
+*.elf
+*.exe
+*.img
+*.lps

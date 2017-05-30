@@ -1,0 +1,163 @@
+#!/usr/bin/python
+
+import os, parse, select, shutil, socket, subprocess, sys, time
+
+outputfolder = 'test'
+
+class TcpChannel:
+    def __init__ (self, name, port):
+#       print name, port
+        self.name = name
+        self.port = port
+        self.linebuffer = ""
+        self.socket = socket.socket ()
+        opened = False
+        while not opened:
+            try:
+                self.socket.connect (('127.0.0.1', self.port))
+                opened = True
+            except:
+                sleep (0.1)
+        self.logfile = open ('{}/{}.txt'.format (outputfolder, self.name), 'a')
+    def writeline (self, line, echo=False):
+#       print '{}>>>>{}'.format (self.name, line)
+        if echo:
+            self.logfile.write ('{}>>>>{}\n'.format (self.name, line))
+        self.socket.sendall (line + '\n')
+    def writekeyboardline (self, line, echo=False):
+#       print '{}>>>>{}'.format (self.name, line)
+        if echo:
+            self.logfile.write ('{}>>>>{}\n'.format (self.name, line))
+        self.socket.sendall (line + '\r')
+    def drain (self):
+            quiet = True
+#           print 'drain {} '.format (self.name),
+            while ([], [], []) != select.select ([self.socket], [], [], 0):
+                try:
+                    data = self.socket.recv (4096)
+                except:
+                    break
+                if data == "":
+                    break
+                quiet = False
+#               print len (data),
+                self.logfile.write (data)
+                for c in data:
+                    if c == '\r':
+                        pass
+                    elif c == '\n':
+#                       print '{}<<<<{}'.format(self.name, self.linebuffer)
+                        index = self.linebuffer.find ('TFTP Ready.')
+                        if index != -1:
+#                           print self.linebuffer
+                            bash (['../../tftp.sh'])
+                        index = self.linebuffer.find ('program stop')
+                        if index != -1:
+#                           print self.linebuffer
+                            global stopping
+                            stopping = True
+                            monitor.writeline ('quit')
+                        index = self.linebuffer.find ('frame buffer')
+                        if index != -1:
+#                           print self.linebuffer
+                            fb = parse.parse ('{} frame buffer at {address} -size {width:d}x{height:d}x{depth:d}', self.linebuffer)
+                            if fb:
+                                framecapture (fb.named ['address'], fb.named ['width'], fb.named ['height'], fb.named ['depth'])
+                        self.linebuffer = ""
+                    else:
+                        self.linebuffer = self.linebuffer + c
+                sleep (0.001, self.name)
+#           if not quiet:
+#               print 'done'
+#           print 'done'
+    def finishquit (self, process):
+        while process.returncode == None:
+            sleep (0.001, 'finishquit ' + self.name)
+            process.poll ()
+            if ([], [], []) != select.select ([self.socket], [], [], 0):
+                sys.stdout.write (self.socket.recv (4096))
+    def close (self):
+        self.logfile.close ()
+        self.socket.close ()
+
+def bash (lines):
+    for line in lines:
+        print 'bash >>', line
+        subprocess.check_call (line, shell=True)
+
+bash (['rm -rf {}/'.format (outputfolder),
+       'mkdir -p {}'.format (outputfolder)])
+
+def g (name):
+    return os.environ ['CIRCLE_'+ name]
+
+cmdline = 'postbuildtest'
+if os.environ.has_key ('CIRCLECI'):
+    cmdline += ' username={} project={} branch={} buildnumber={}'.format (g ('PROJECT_USERNAME'), g ('PROJECT_REPONAME'), g ('BRANCH'), g ('BUILD_NUM'))
+
+qemuprocess = subprocess.Popen (["qemu-system-arm",
+                                 "-M", "versatilepb",
+                                 "-cpu", "cortex-a8",
+                                 "-kernel", "kernel.bin",
+                                 "-append", cmdline,
+                                 "-m", "96M",
+                                 "-usb",
+                                 "-net", "nic",
+                                 "-net", "user,hostfwd=tcp::5023-:23,hostfwd=udp::5069-:69,hostfwd=tcp::5080-:80",
+                                 "-display", "none",
+                                 "-monitor", "tcp:127.0.0.1:38004,server",
+                                 "-serial", "tcp:127.0.0.1:38000,server",
+                                 "-serial", "tcp:127.0.0.1:38001,server",
+                                 "-serial", "tcp:127.0.0.1:38002,server",
+                                 "-serial", "tcp:127.0.0.1:38003,server"],
+                                stdout=subprocess.PIPE,
+                                stderr=subprocess.PIPE)
+print "qemu started"
+
+serial = {}
+screennumber = 1
+framenumber = 1
+def drainall (message=""):
+#   if message != "":
+#       print "drainall " + message
+    for i in serial:
+        serial [i].drain ()
+    monitor.drain ()
+def screendump ():
+    global screennumber
+    monitor.writeline ('screendump {}/screen-{:02d}.ppm'.format (outputfolder, screennumber))
+    screennumber = screennumber + 1
+def framecapture (address, width, height, depth):
+    print 'framecapture', address, width, height, depth
+    global framenumber
+    monitor.writeline ('memsave {} {} {}/frame-{:02d}-{}x{}x{}.fb'.format (address, width * height * depth, outputfolder, framenumber, width, height, depth))
+    framenumber = framenumber + 1
+def sleep (seconds, message=''):
+#   print 'sleep {} {}'.format (seconds, message)
+    time.sleep (seconds)
+
+print "channels"
+monitor = TcpChannel ('qemumonitor', 38004)
+for i in range (4):
+    serial [i] = TcpChannel ('serial{}'.format (i),  38000 + i)
+print "channels"
+
+def run ():
+    global stopping
+    stopping = False
+    print "draining"
+    while not stopping:
+        drainall ("not stopping")
+    print "stopping"
+    drainall ("stopping")
+    sleep (1)
+    print "one more before quit"
+    drainall ("one more before quit")
+    monitor.finishquit (qemuprocess)
+
+run ()
+
+monitor.close ()
+for i in serial:
+    serial [i].logfile.write ('\n')
+    serial [i].close ()
