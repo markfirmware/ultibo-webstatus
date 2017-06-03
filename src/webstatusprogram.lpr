@@ -306,10 +306,6 @@ var
  SystemResetHistory:TSystemResetHistory;
 
 procedure SystemReset;
-{$ifdef CONTROLLER_QEMUVPB}
-var
- SysResetRegister:LongWord;
-{$endif} 
 begin
  {$ifdef CONTROLLER_QEMUVPB}
   ConsoleWindowSetBackColor(Window,COLOR_YELLOW);
