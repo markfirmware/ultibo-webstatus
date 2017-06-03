@@ -350,7 +350,6 @@ begin
  Log(Format('Reset count %d Time since last reset %5.3f seconds',[SystemResetHistory.GetResetCount,SystemResetHistory.SecondsSinceLastReset]));
  ParseCommandLine;
  Log(Format('Ultibo Release %s %s %s',[ULTIBO_RELEASE_DATE,ULTIBO_RELEASE_NAME,ULTIBO_RELEASE_VERSION]));
- IpAddress:=GetIpAddress;
  if Controller = QemuVpb then
   begin
    EffectiveIpAddress:=QemuHostIpAddress;
@@ -358,6 +357,7 @@ begin
   end
  else
   begin
+   IpAddress:=GetIpAddress;
    EffectiveIpAddress:=IpAddress;
    Log(Format('IP address %s',[EffectiveIpAddress]));
   end;
