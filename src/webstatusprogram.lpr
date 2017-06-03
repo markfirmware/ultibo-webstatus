@@ -319,7 +319,7 @@ begin
   Sleep(1 * 1000);
   Log('this can take up to 5 seconds ...');
   SystemResetHistory.SetClockCountAtLastReset(ClockGetCount);
-  SystemRestart;
+  SystemRestart(0);
  {$endif} 
 end;
 
