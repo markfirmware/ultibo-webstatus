@@ -43,7 +43,7 @@ begin
  WriteLn(S);
  X:=ConsoleWhereX;
  Y:=ConsoleWhereY;
- ConsoleGotoXY(1,6);
+ ConsoleGotoXY(1,5);
  ConsoleClrEol;
  ConsoleGotoXY(X,Y);
 end;
@@ -335,7 +335,7 @@ var
  MouseOffsetX,MouseOffsetY,MouseOffsetWheel:Integer;
  I,X,Y:Cardinal;
  Key:Char;
- CapturedClockGetTotal,CapturedClockSeconds,CapturedSysRtcGetTime:Int64;
+ CapturedClockGetTotal,CapturedSysRtcGetTime:Int64;
  AdjustedRtc,RtcAdjustment:Int64;
 begin
  SystemResetHistory:=TSystemResetHistory.Create(Pointer((64 - 1) * 1024*1024));
@@ -353,7 +353,7 @@ begin
  DetermineEntryState;
  StartLogging;
  Sleep(500);
- for I:=1 to 6 do
+ for I:=1 to 5 do
   Log ('');
  Log('program start');
  Log(Format('Reset count %d Time since last reset %5.3f seconds',[SystemResetHistory.GetResetCount,SystemResetHistory.SecondsSinceLastReset]));
@@ -380,7 +380,6 @@ begin
    begin
     CapturedSysRtcGetTime:=SysRtcGetTime;
     CapturedClockGetTotal:=ClockGetTotal;
-    CapturedClockSeconds:=ClockSeconds;
     AdjustedRtc:=(CapturedSysRtcGetTime - RtcAdjustment) div (10*1000*1000) * (10*1000*1000);
     FrameMeter.Increment;
     if ConsoleKeyPressed then
@@ -432,10 +431,6 @@ begin
     Write(Format('   Clock %8d RTC (adjusted) %9d',[CapturedClockGetTotal,AdjustedRtc]));
     ConsoleClrEol;
     ConsoleGotoXY(20,4);
-    Write(Format('   ClockSeconds %d Error %d',[CapturedClockSeconds, CapturedClockGetTotal div (1000*1000) - CapturedClockSeconds]));
-    ConsoleClrEol;
-    ConsoleGotoXY(20,5);
-    Write(Format('   ',[]));
     ConsoleClrEol;
     ConsoleGotoXY(X,Y);
    end;
