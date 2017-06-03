@@ -172,7 +172,6 @@ begin
    Result:=Winsock2TCPClient.LocalAddress;
   end;
  Winsock2TCPClient.Free;
- Log(Format('IP address %s',[Result]));
 end;
 
 var
@@ -351,16 +350,16 @@ begin
  Log(Format('Reset count %d Time since last reset %5.3f seconds',[SystemResetHistory.GetResetCount,SystemResetHistory.SecondsSinceLastReset]));
  ParseCommandLine;
  Log(Format('Ultibo Release %s %s %s',[ULTIBO_RELEASE_DATE,ULTIBO_RELEASE_NAME,ULTIBO_RELEASE_VERSION]));
+ IpAddress:=GetIpAddress;
  if Controller = QemuVpb then
   begin
    EffectiveIpAddress:=QemuHostIpAddress;
-   Log('');
    Log(Format('Web Server Effective URL (running under QEMU) is http://%s:557%s',[EffectiveIpAddress,QemuHostIpPortDigit]));
   end
  else
   begin
-   IpAddress:=GetIpAddress;
    EffectiveIpAddress:=IpAddress;
+   Log(Format('IP address %s',[EffectiveIpAddress]));
   end;
  StartHttpServer;
  Log('');
@@ -417,7 +416,7 @@ begin
     Write(Format('   Frame Count %3d Rate %5.1f Hz',[FrameMeter.GetCount,FrameMeter.RateInHz]));
     ConsoleClrEol;
     ConsoleGotoXY(20,2);
-    Write(Format('   Mouse Count %3d Rate %5.1f Hz dx %4d dy %4d dw %d Buttons %4.4x',[MouseMeter.Count,MouseMeter.RateInHz,MouseOffsetX,MouseOffsetY,MouseOffsetWheel,MouseButtons]));
+    Write(Format('   Mouse Count %3d Rate %5.1f Hz dx %4d dy %4d dw %2d Buttons %4.4x',[MouseMeter.Count,MouseMeter.RateInHz,MouseOffsetX,MouseOffsetY,MouseOffsetWheel,MouseButtons]));
     ConsoleClrEol;
     ConsoleGotoXY(20,3);
     Write(Format('   Clock %8d RTC (adjusted) %9d',[CapturedClockGetTotal,AdjustedRtc]));
