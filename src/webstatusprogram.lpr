@@ -95,7 +95,7 @@ type
   StartingClockCount:LongWord;
  end;
 
- TSystemResetHistory = record
+ TSystemRestartHistory = record
   Valid:Boolean;
   Storage:PPersistentStorage;
   constructor Create(Where:Pointer);
@@ -109,7 +109,7 @@ var
  EffectiveIpAddress:String;
  HTTPListener:THTTPListener;
 
-constructor TSystemResetHistory.Create(Where:Pointer);
+constructor TSystemRestartHistory.Create(Where:Pointer);
 const
  InitializationSignature=$73AF72EC;
 begin
@@ -132,7 +132,7 @@ begin
   end;
 end;
 
-function TSystemResetHistory.GetResetCount:LongWord;
+function TSystemRestartHistory.GetResetCount:LongWord;
 begin
  if Valid then
   Result:=Storage.ResetCount
@@ -140,7 +140,7 @@ begin
   Result:=0;
 end;
 
-function TSystemResetHistory.SecondsSinceLastReset:Double;
+function TSystemRestartHistory.SecondsSinceLastReset:Double;
 begin
  if Valid then
   begin
@@ -152,7 +152,7 @@ begin
   end;
 end;
 
-procedure TSystemResetHistory.SetClockCountAtLastReset(Count:LongWord);
+procedure TSystemRestartHistory.SetClockCountAtLastReset(Count:LongWord);
 begin
  if Valid then
   Storage.ClockCountAtLastReset:=Count;
@@ -302,9 +302,9 @@ begin
 end;
 
 var
- SystemResetHistory:TSystemResetHistory;
+ SystemRestartHistory:TSystemRestartHistory;
 
-procedure SystemReset;
+procedure SystemRestartWithHistory;
 begin
  {$ifdef CONTROLLER_QEMUVPB}
   ConsoleWindowSetBackColor(Window,COLOR_YELLOW);
@@ -313,7 +313,7 @@ begin
   Log('system reset initiated');
   Sleep(1 * 1000);
   Log('this can take up to 5 seconds ...');
-  SystemResetHistory.SetClockCountAtLastReset(ClockGetCount);
+  SystemRestartHistory.SetClockCountAtLastReset(ClockGetCount);
   SystemRestart(0);
  {$endif} 
 end;
@@ -329,9 +329,10 @@ var
  CapturedClockGetTotal,CapturedSysRtcGetTime:Int64;
  AdjustedRtc,RtcAdjustment:Int64;
 begin
- SystemResetHistory:=TSystemResetHistory.Create(Pointer((64 - 1) * 1024*1024));
+ SystemRestartHistory:=TSystemRestartHistory.Create(Pointer((64 - 1) * 1024*1024));
  Window:=ConsoleWindowCreate(ConsoleDeviceGetDefault,CONSOLE_POSITION_FULL,True);
  ConsoleWindowSetBackColor(Window,COLOR_WHITE);
+ ConsoleClrScr;
  RtcAdjustment:=SysRtcGetTime - ClockGetTotal * 10;
  BuildNumber:=0;
  FrameMeter:=TRateMeter.Create;
@@ -347,7 +348,7 @@ begin
  for I:=1 to 5 do
   Log ('');
  Log('program start');
- Log(Format('Reset count %d Time since last reset %5.3f seconds',[SystemResetHistory.GetResetCount,SystemResetHistory.SecondsSinceLastReset]));
+ Log(Format('Reset count %d Time since last reset %5.3f seconds',[SystemRestartHistory.GetResetCount,SystemRestartHistory.SecondsSinceLastReset]));
  ParseCommandLine;
  Log(Format('Ultibo Release %s %s %s',[ULTIBO_RELEASE_DATE,ULTIBO_RELEASE_NAME,ULTIBO_RELEASE_VERSION]));
  if Controller = QemuVpb then
@@ -379,7 +380,7 @@ begin
       Log(Format('KeyPressed <%s> %d',[Key,Ord(Key)]));
       if Key = 'r' then
        begin
-        SystemReset;
+        SystemRestartWithHistory;
        end;
       if Ord(Key) = 163 then
        begin
