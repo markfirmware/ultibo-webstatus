@@ -176,34 +176,36 @@ end;
 
 var
  BuildNumber:Cardinal;
+ Branch:String;
  QemuHostIpAddress:String;
  QemuHostIpPortDigit:String;
 
 procedure ParseCommandLine;
 var
- I,Start:Cardinal;
+ I:Cardinal;
  Param:String;
+ S:String;
+ procedure ParseString(Option:String; var Value:String);
+ var
+  Start:Cardinal;
+ begin
+  if AnsiStartsStr(Option + '=',Param) then
+   begin
+    Start:=PosEx('=',Param);
+    Value:=MidStr(Param,Start + 1,Length(Param) - Start);
+   end;
+ end;
 begin
  Log(Format('Command Line = <%s>',[GetCommandLine]));
  for I:=0 to ParamCount do
   begin
    Param:=ParamStr(I);
    Log(Format('Param %d = %s',[I,Param]));
-   if AnsiStartsStr('buildnumber=',Param) then
-    begin
-     Start:=PosEx('=',Param);
-     BuildNumber:=StrToInt(MidStr(Param,Start + 1,Length(Param) - Start));
-    end;
-   if AnsiStartsStr('qemuhostip=',Param) then
-    begin
-     Start:=PosEx('=',Param);
-     QemuHostIpAddress:=MidStr(Param,Start + 1,Length(Param) - Start);
-    end;
-   if AnsiStartsStr('qemuhostportdigit=',Param) then
-    begin
-     Start:=PosEx('=',Param);
-     QemuHostIpPortDigit:=MidStr(Param,Start + 1,Length(Param) - Start);
-    end;
+   ParseString('buildnumber',S);
+   BuildNumber:=StrToInt(S);
+   ParseString('branch',Branch);
+   ParseString('qemuhostip',QemuHostIpAddress);
+   ParseString('qemuhostportdigit',QemuHostIpPortDigit);
   end;
 end;
 
@@ -215,8 +217,8 @@ type
 function TWebAboutStatus.DoContent(AHost:THTTPHost;ARequest:THTTPServerRequest;AResponse:THTTPServerResponse):Boolean; 
 begin
  AddItem(AResponse,'QEMU vnc server',Format('Connect vnc viewer to host %s port 597%s or ',[EffectiveIpAddress,QemuHostIpPortDigit]) + MakeLink('use web browser',Format('http://novnc.com/noVNC/vnc_auto.html?host=%s&port=577%s&reconnect=1&reconnect_delay=5000',[EffectiveIpAddress,QemuHostIpPortDigit])));
- AddItem(AResponse,'CircleCI Build:',MakeLink(Format('Build #%d markfirmware/ultibo-webstatus (branch test-20170425)',[BuildNumber]),Format('https://circleci.com/gh/markfirmware/ultibo-webstatus/%d#artifacts/containers/0',[BuildNumber])));
- AddItem(AResponse,'GitHub Source:',MakeLink('markfirmware/ultibo-webstatus (branch test-20170425)','https://github.com/markfirmware/ultibo-webstatus/tree/test-20170425'));
+ AddItem(AResponse,'CircleCI Build:',MakeLink(Format('Build #%d markfirmware/ultibo-webstatus (branch %s)',[BuildNumber,Branch]),Format('https://circleci.com/gh/markfirmware/ultibo-webstatus/%d#artifacts/containers/0',[BuildNumber])));
+ AddItem(AResponse,'GitHub Source:',MakeLink(Format('markfirmware/ultibo-webstatus (branch %s)',[Branch]),Format('https://github.com/markfirmware/ultibo-webstatus/tree/%s',[Branch])));
  Result:=True;
 end;
 
