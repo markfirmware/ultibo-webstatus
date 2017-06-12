@@ -201,11 +201,12 @@ begin
   begin
    Param:=ParamStr(I);
    Log(Format('Param %d = %s',[I,Param]));
-// ParseString('branch',Branch);
-// ParseString('qemuhostip',QemuHostIpAddress);
-// ParseString('qemuhostportdigit',QemuHostIpPortDigit);
-// ParseString('buildnumber',S);
-// BuildNumber:=StrToInt(S);
+   ParseString('branch',Branch);
+   ParseString('qemuhostip',QemuHostIpAddress);
+   ParseString('qemuhostportdigit',QemuHostIpPortDigit);
+   ParseString('buildnumber',S);
+   if S <> '' then
+    BuildNumber:=StrToInt(S);
   end;
 end;
 
