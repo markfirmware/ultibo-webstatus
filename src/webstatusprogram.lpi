@@ -36,6 +36,7 @@
       <Unit0>
         <Filename Value="webstatusprogram.lpr"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="WebStatusProgram"/>
       </Unit0>
     </Units>
   </ProjectOptions>

@@ -9,7 +9,7 @@ uses
 
  Classes,Console,GlobalConfig,GlobalConst,GlobalTypes,
  HeapManager,HTTP,Ip,Logging,Mouse,Network,Platform,Rtc,Serial,
- StrUtils,SysUtils,Ultibo,WebStatus,Winsock2;
+ StrUtils,SysUtils,Threads,Ultibo,WebStatus,Winsock2;
 
 type
  TController = (Rpi, Rpi2, Rpi3, QemuVpb);
@@ -163,6 +163,7 @@ end;
 procedure TSystemRestartHistory.Update;
 var
  HeapStatus:THeapStatus;
+ ThreadSnapShot,Current:PThreadSnapShot;
 begin
  if Valid then
   begin
@@ -170,6 +171,15 @@ begin
    Storage.MostRecentClockCount:=ClockGetCount;
    Storage.TotalFree:=HeapStatus.TotalFree;
    Storage.TerminatedThreadCount:=0;
+   ThreadSnapShot:=ThreadSnapShotCreate;
+   Current:=ThreadSnapShot;
+   while Assigned(Current) do
+    begin
+     if Current.State = THREAD_STATE_TERMINATED then
+      Inc(Storage.TerminatedThreadCount);
+     Current:=Current.Next;
+    end;
+   ThreadSnapShotDestroy(ThreadSnapShot);
   end;
 end;
 
