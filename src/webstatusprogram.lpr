@@ -35,8 +35,8 @@ begin
              {$ifdef CONTROLLER_QEMUVPB}             QemuVpb {$endif};
 end;
 
-var
- LineNumber:Cardinal;
+const
+ ReservedLines=7;
 
 procedure Log(S:String);
 var
@@ -46,7 +46,7 @@ begin
  WriteLn(S);
  X:=ConsoleWhereX;
  Y:=ConsoleWhereY;
- ConsoleGotoXY(1,LineNumber);
+ ConsoleGotoXY(1,ReservedLines);
  ConsoleClrEol;
  ConsoleGotoXY(X,Y);
 end;
@@ -92,8 +92,11 @@ type
  TPersistentStorage = packed record
   ReservedForHeapManager:array[0..31] of Byte;
   Signature:LongWord;
-  ResetCount:LongWord;
+  MostRecentClockCount:LongWord;
+  TotalFree:LongWord;
+  TerminatedThreadCount:LongWord;
   ClockCountAtLastReset:LongWord;
+  ResetCount:LongWord;
   ClockCountForColdStart:LongWord;
   StartingClockCount:LongWord;
  end;
@@ -105,6 +108,9 @@ type
   function GetResetCount:LongWord;
   function SecondsSinceLastReset:Double;
   procedure SetClockCountAtLastReset(Count:LongWord);
+  procedure Update;
+  function GetTotalFree:LongWord;
+  function GetTerminatedThreadCount:LongWord;
  end;
 
 var
@@ -124,6 +130,9 @@ begin
    if Storage.Signature <> InitializationSignature then
     begin
      Storage.Signature:=InitializationSignature;
+     Storage.MostRecentClockCount:=0;
+     Storage.TotalFree:=0;
+     Storage.TerminatedThreadCount:=0;
      Storage.ResetCount:=0;
      Storage.ClockCountAtLastReset:=0;
      Storage.ClockCountForColdStart:=Storage.StartingClockCount;
@@ -146,13 +155,38 @@ end;
 function TSystemRestartHistory.SecondsSinceLastReset:Double;
 begin
  if Valid then
-  begin
-   Result:=(ClockGetCount - Storage.ClockCountAtLastReset) / (1000*1000);
-  end
+  Result:=(ClockGetCount - Storage.ClockCountAtLastReset) / (1000*1000)
  else
+  Result:=0;
+end;
+
+procedure TSystemRestartHistory.Update;
+var
+ HeapStatus:THeapStatus;
+begin
+ if Valid then
   begin
-   Result:=0;
+   HeapStatus:=GetHeapStatus;
+   Storage.MostRecentClockCount:=ClockGetCount;
+   Storage.TotalFree:=HeapStatus.TotalFree;
+   Storage.TerminatedThreadCount:=0;
   end;
+end;
+
+function TSystemRestartHistory.GetTotalFree:Longword;
+begin
+ if Valid then
+  Result:=Storage.TotalFree
+ else
+  Result:=0;
+end;
+
+function TSystemRestartHistory.GetTerminatedThreadCount:Longword;
+begin
+ if Valid then
+  Result:=Storage.TerminatedThreadCount
+ else
+  Result:=0;
 end;
 
 procedure TSystemRestartHistory.SetClockCountAtLastReset(Count:LongWord);
@@ -326,7 +360,6 @@ end;
 
 procedure Main;
 var
- HeapStatus:THeapStatus;
  MouseData:TMouseData;
  MouseCount:Cardinal;
  MouseButtons:Word;
@@ -336,7 +369,7 @@ var
  AdjustedRtc,RtcAdjustment:Int64;
  procedure Update;
  var
-  X,Y:Cardinal;
+  LineNumber,X,Y:Cardinal;
   procedure Line(S:String);
   begin
    ConsoleGotoXY(20,LineNumber);
@@ -345,14 +378,14 @@ var
    Inc(LineNumber);
   end;
  begin
+  SystemRestartHistory.Update;
   X:=ConsoleWhereX;
   Y:=ConsoleWhereY;
   LineNumber:=1;
   Line(Format('   Frame Count %3d Rate %5.1f Hz',[FrameMeter.GetCount,FrameMeter.RateInHz]));
   Line(Format('   Mouse Count %3d Rate %5.1f Hz dx %4d dy %4d dw %2d Buttons %4.4x',[MouseMeter.Count,MouseMeter.RateInHz,MouseOffsetX,MouseOffsetY,MouseOffsetWheel,MouseButtons]));
   Line(Format('   Clock %8d RTC (adjusted) %9d',[CapturedClockGetTotal,AdjustedRtc]));
-  HeapStatus:=GetHeapStatus;
-  Line(Format('   Free Memory %8d',[HeapStatus.TotalFree]));
+  Line(Format('   THeapstatus.TotalFree %8d Terminated Threads %3d',[SystemRestartHistory.GetTotalFree,SystemRestartHistory.GetTerminatedThreadCount]));
   ConsoleGotoXY(X,Y);
  end;
 begin
@@ -360,6 +393,7 @@ begin
  Window:=ConsoleWindowCreate(ConsoleDeviceGetDefault,CONSOLE_POSITION_FULL,True);
  ConsoleWindowSetBackColor(Window,COLOR_WHITE);
  ConsoleClrScr;
+ ConsoleGotoXY(1,ReservedLines);
  RtcAdjustment:=SysRtcGetTime - ClockGetTotal * 10;
  BuildNumber:=0;
  FrameMeter:=TRateMeter.Create;
@@ -372,8 +406,6 @@ begin
  DetermineEntryState;
  StartLogging;
  Sleep(500);
- Update;
- ConsoleGotoXY(1,LineNumber);
  Log('program start');
  Log(Format('Reset count %d Time since last reset %5.3f seconds',[SystemRestartHistory.GetResetCount,SystemRestartHistory.SecondsSinceLastReset]));
  ParseCommandLine;
