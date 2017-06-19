@@ -35,6 +35,9 @@ begin
              {$ifdef CONTROLLER_QEMUVPB}             QemuVpb {$endif};
 end;
 
+var
+ LineNumber:Cardinal;
+
 procedure Log(S:String);
 var
  X,Y:Cardinal;
@@ -43,7 +46,7 @@ begin
  WriteLn(S);
  X:=ConsoleWhereX;
  Y:=ConsoleWhereY;
- ConsoleGotoXY(1,5);
+ ConsoleGotoXY(1,LineNumber);
  ConsoleClrEol;
  ConsoleGotoXY(X,Y);
 end;
@@ -323,14 +326,35 @@ end;
 
 procedure Main;
 var
+ HeapStatus:THeapStatus;
  MouseData:TMouseData;
  MouseCount:Cardinal;
  MouseButtons:Word;
  MouseOffsetX,MouseOffsetY,MouseOffsetWheel:Integer;
- I,X,Y:Cardinal;
  Key:Char;
  CapturedClockGetTotal,CapturedSysRtcGetTime:Int64;
  AdjustedRtc,RtcAdjustment:Int64;
+ procedure Update;
+ var
+  X,Y:Cardinal;
+  procedure Line(S:String);
+  begin
+   ConsoleGotoXY(20,LineNumber);
+   Write(S);
+   ConsoleClrEol;
+   Inc(LineNumber);
+  end;
+ begin
+  X:=ConsoleWhereX;
+  Y:=ConsoleWhereY;
+  LineNumber:=1;
+  Line(Format('   Frame Count %3d Rate %5.1f Hz',[FrameMeter.GetCount,FrameMeter.RateInHz]));
+  Line(Format('   Mouse Count %3d Rate %5.1f Hz dx %4d dy %4d dw %2d Buttons %4.4x',[MouseMeter.Count,MouseMeter.RateInHz,MouseOffsetX,MouseOffsetY,MouseOffsetWheel,MouseButtons]));
+  Line(Format('   Clock %8d RTC (adjusted) %9d',[CapturedClockGetTotal,AdjustedRtc]));
+  HeapStatus:=GetHeapStatus;
+  Line(Format('   Free Memory %8d',[HeapStatus.TotalFree]));
+  ConsoleGotoXY(X,Y);
+ end;
 begin
  SystemRestartHistory:=TSystemRestartHistory.Create(Pointer((64 - 1) * 1024*1024));
  Window:=ConsoleWindowCreate(ConsoleDeviceGetDefault,CONSOLE_POSITION_FULL,True);
@@ -348,8 +372,8 @@ begin
  DetermineEntryState;
  StartLogging;
  Sleep(500);
- for I:=1 to 5 do
-  Log ('');
+ Update;
+ ConsoleGotoXY(1,LineNumber);
  Log('program start');
  Log(Format('Reset count %d Time since last reset %5.3f seconds',[SystemRestartHistory.GetResetCount,SystemRestartHistory.SecondsSinceLastReset]));
  ParseCommandLine;
@@ -414,20 +438,7 @@ begin
         break;
        end;
      end;
-    X:=ConsoleWhereX;
-    Y:=ConsoleWhereY;
-    ConsoleGotoXY(20,1);
-    Write(Format('   Frame Count %3d Rate %5.1f Hz',[FrameMeter.GetCount,FrameMeter.RateInHz]));
-    ConsoleClrEol;
-    ConsoleGotoXY(20,2);
-    Write(Format('   Mouse Count %3d Rate %5.1f Hz dx %4d dy %4d dw %2d Buttons %4.4x',[MouseMeter.Count,MouseMeter.RateInHz,MouseOffsetX,MouseOffsetY,MouseOffsetWheel,MouseButtons]));
-    ConsoleClrEol;
-    ConsoleGotoXY(20,3);
-    Write(Format('   Clock %8d RTC (adjusted) %9d',[CapturedClockGetTotal,AdjustedRtc]));
-    ConsoleClrEol;
-    ConsoleGotoXY(20,4);
-    ConsoleClrEol;
-    ConsoleGotoXY(X,Y);
+    Update;
    end;
 end;
 
