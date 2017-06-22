@@ -2,9 +2,9 @@ program WebStatusProgram;
 {$mode delphi}{$h+}
 
 uses
- {$ifdef CONTROLLER_RPI_INCLUDING_RPI0}  BCM2835,BCM2708,PlatformRPi,                 {$endif}
- {$ifdef CONTROLLER_RPI2_INCLUDING_RPI3} BCM2836,BCM2709,PlatformRPi2,                {$endif}
- {$ifdef CONTROLLER_RPI3}                BCM2837,BCM2710,PlatformRPi3,                {$endif}
+ {$ifdef CONTROLLER_RPI_INCLUDING_RPI0}  BCM2835,BCM2708,PlatformRPi,RaspberryPi,     {$endif}
+ {$ifdef CONTROLLER_RPI2_INCLUDING_RPI3} BCM2836,BCM2709,PlatformRPi2,RaspberryPi2,   {$endif}
+ {$ifdef CONTROLLER_RPI3}                BCM2837,BCM2710,PlatformRPi3,RaspberryPi3,   {$endif}
  {$ifdef CONTROLLER_QEMUVPB}             QEMUVersatilePB,PlatformQemuVpb,VersatilePB, {$endif}
 
  Classes,Console,GlobalConfig,GlobalConst,GlobalTypes,
@@ -92,13 +92,15 @@ type
  TPersistentStorage = packed record
   ReservedForHeapManager:array[0..31] of Byte;
   Signature:LongWord;
-  MostRecentClockCount:LongWord;
+  MostRecentClockTotal:Int64;
+  IdleCounter:LongWord;
+  AboutPageCounter:LongWord;
   TotalFree:LongWord;
   TerminatedThreadCount:LongWord;
-  ClockCountAtLastReset:LongWord;
+  ClockTotalAtLastReset:Int64;
   ResetCount:LongWord;
-  ClockCountForColdStart:LongWord;
-  StartingClockCount:LongWord;
+  ClockTotalForColdStart:Int64;
+  StartingClockTotal:Int64;
  end;
 
  TSystemRestartHistory = record
@@ -107,10 +109,12 @@ type
   constructor Create(Where:Pointer);
   function GetResetCount:LongWord;
   function SecondsSinceLastReset:Double;
-  procedure SetClockCountAtLastReset(Count:LongWord);
   procedure Update;
   function GetTotalFree:LongWord;
   function GetTerminatedThreadCount:LongWord;
+  procedure IncrementIdleCounter;
+  procedure IncrementAboutPageCounter;
+  function GetAboutPageCounter:LongWord;
  end;
 
 var
@@ -126,20 +130,23 @@ begin
  Valid:=Storage = Where;
  if Valid then
   begin
-   Storage.StartingClockCount:=ClockGetCount;
+   Storage.StartingClockTotal:=ClockGetTotal;
    if Storage.Signature <> InitializationSignature then
     begin
      Storage.Signature:=InitializationSignature;
-     Storage.MostRecentClockCount:=0;
+     Storage.MostRecentClockTotal:=0;
+     Storage.IdleCounter:=0;
+     Storage.AboutPageCounter:=0;
      Storage.TotalFree:=0;
      Storage.TerminatedThreadCount:=0;
      Storage.ResetCount:=0;
-     Storage.ClockCountAtLastReset:=0;
-     Storage.ClockCountForColdStart:=Storage.StartingClockCount;
+     Storage.ClockTotalAtLastReset:=ClockGetTotal;
+     Storage.ClockTotalForColdStart:=Storage.StartingClockTotal;
     end
    else
     begin
      Inc(Storage.ResetCount);
+     Storage.ClockTotalAtLastReset:=Storage.MostRecentClockTotal;
     end;
   end;
 end;
@@ -152,10 +159,30 @@ begin
   Result:=0;
 end;
 
+procedure TSystemRestartHistory.IncrementIdleCounter;
+begin
+ if Valid then
+  Inc(Storage.IdleCounter);
+end;
+
+procedure TSystemRestartHistory.IncrementAboutPageCounter;
+begin
+ if Valid then
+  Inc(Storage.AboutPageCounter);
+end;
+
 function TSystemRestartHistory.SecondsSinceLastReset:Double;
 begin
  if Valid then
-  Result:=(ClockGetCount - Storage.ClockCountAtLastReset) / (1000*1000)
+  Result:=(ClockGetTotal - Storage.ClockTotalAtLastReset) / (1000*1000)
+ else
+  Result:=0;
+end;
+
+function TSystemRestartHistory.GetAboutPageCounter:LongWord;
+begin
+ if Valid then
+  Result:=Storage.AboutPageCounter
  else
   Result:=0;
 end;
@@ -168,7 +195,7 @@ begin
  if Valid then
   begin
    HeapStatus:=GetHeapStatus;
-   Storage.MostRecentClockCount:=ClockGetCount;
+   Storage.MostRecentClockTotal:=ClockGetTotal;
    Storage.TotalFree:=HeapStatus.TotalFree;
    Storage.TerminatedThreadCount:=0;
    ThreadSnapShot:=ThreadSnapShotCreate;
@@ -197,12 +224,6 @@ begin
   Result:=Storage.TerminatedThreadCount
  else
   Result:=0;
-end;
-
-procedure TSystemRestartHistory.SetClockCountAtLastReset(Count:LongWord);
-begin
- if Valid then
-  Storage.ClockCountAtLastReset:=Count;
 end;
 
 function GetIpAddress:String;
@@ -257,6 +278,9 @@ begin
   end;
 end;
 
+var
+ SystemRestartHistory:TSystemRestartHistory;
+
 type
  TWebAboutStatus = class (TWebStatusCustom)
   function DoContent(AHost:THTTPHost;ARequest:THTTPServerRequest;AResponse:THTTPServerResponse):Boolean; override;
@@ -264,6 +288,8 @@ type
 
 function TWebAboutStatus.DoContent(AHost:THTTPHost;ARequest:THTTPServerRequest;AResponse:THTTPServerResponse):Boolean; 
 begin
+ SystemRestartHistory.IncrementAboutPageCounter;
+ LoggingOutput(Format('http get status/about %d',[SystemRestartHistory.GetAboutPageCounter]));
  AddItem(AResponse,'QEMU vnc server',Format('Connect vnc viewer to host %s port 597%s or ',[EffectiveIpAddress,QemuHostIpPortDigit]) + MakeLink('use web browser',Format('http://novnc.com/noVNC/vnc_auto.html?host=%s&port=577%s&reconnect=1&reconnect_delay=5000',[EffectiveIpAddress,QemuHostIpPortDigit])));
  AddItem(AResponse,'CircleCI Build:',MakeLink(Format('Build #%d markfirmware/ultibo-webstatus (branch %s)',[BuildNumber,Branch]),Format('https://circleci.com/gh/markfirmware/ultibo-webstatus/%d#artifacts/containers/0',[BuildNumber])));
  AddItem(AResponse,'GitHub Source:',MakeLink(Format('markfirmware/ultibo-webstatus (branch %s)',[Branch]),Format('https://github.com/markfirmware/ultibo-webstatus/tree/%s',[Branch])));
@@ -351,9 +377,6 @@ begin
  Result:=Count;
 end;
 
-var
- SystemRestartHistory:TSystemRestartHistory;
-
 procedure SystemRestartWithHistory;
 begin
  {$ifdef CONTROLLER_QEMUVPB}
@@ -363,9 +386,23 @@ begin
   Log('system reset initiated');
   Sleep(1 * 1000);
   Log('this can take up to 5 seconds ...');
-  SystemRestartHistory.SetClockCountAtLastReset(ClockGetCount);
+  SystemRestartHistory.Update;
   SystemRestart(0);
  {$endif} 
+end;
+
+var
+ IdleThread:TThreadHandle;
+
+function IdleThreadProcedure(Parameter:Pointer):PtrInt;
+begin
+ Result:=0;
+ ThreadSetName(GetCurrentThreadId,'IdleThread');
+ while True do
+  begin
+   SystemRestartHistory.IncrementIdleCounter;
+   Sleep(1*1000);
+  end;
 end;
 
 procedure Main;
@@ -396,6 +433,7 @@ var
   Line(Format('   Mouse Count %3d Rate %5.1f Hz dx %4d dy %4d dw %2d Buttons %4.4x',[MouseMeter.Count,MouseMeter.RateInHz,MouseOffsetX,MouseOffsetY,MouseOffsetWheel,MouseButtons]));
   Line(Format('   Clock %8d RTC (adjusted) %9d',[CapturedClockGetTotal,AdjustedRtc]));
   Line(Format('   THeapstatus.TotalFree %8d Terminated Threads %3d',[SystemRestartHistory.GetTotalFree,SystemRestartHistory.GetTerminatedThreadCount]));
+  Line(Format('   About Page Count %4d',[SystemRestartHistory.GetAboutPageCounter]));
   ConsoleGotoXY(X,Y);
  end;
 begin
@@ -417,6 +455,7 @@ begin
  StartLogging;
  Sleep(500);
  Log('program start');
+ IdleThread:=BeginThread(@IdleThreadProcedure,nil,IdleThread,THREAD_STACK_DEFAULT_SIZE);
  Log(Format('Reset count %d Time since last reset %5.3f seconds',[SystemRestartHistory.GetResetCount,SystemRestartHistory.SecondsSinceLastReset]));
  ParseCommandLine;
  Log(Format('Ultibo Release %s %s %s',[ULTIBO_RELEASE_DATE,ULTIBO_RELEASE_NAME,ULTIBO_RELEASE_VERSION]));
@@ -481,7 +520,7 @@ begin
        end;
      end;
     Update;
-    Sleep(100);
+//    Sleep(20);
    end;
 end;
 
