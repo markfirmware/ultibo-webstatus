@@ -481,6 +481,7 @@ begin
        end;
      end;
     Update;
+    Sleep(100);
    end;
 end;
 
