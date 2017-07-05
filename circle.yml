@@ -1,7 +1,7 @@
 version: 2
 executorType: docker
 containerInfo:
-  - image: markfirmware/ultibo-core:test-1.3.363-x64-1498715235731
+  - image: markfirmware/ultibo-core:test-1.3.373-x64-1499238946924
 stages:
   build:
     workDir: ~/ultibo-webstatus
